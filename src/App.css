@@ -1,0 +1,66 @@
+/* Estilos generales */
+.loading-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.spinner {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-content p {
+  margin-top: 16px;
+  color: #666;
+}
+
+/* Estilos para la página 404 */
+.not-found {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-found-content {
+  text-align: center;
+}
+
+.not-found-content h1 {
+  font-size: 48px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.not-found-content p {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.not-found-content a {
+  color: #3498db;
+  text-decoration: underline;
+}
+
+.not-found-content a:hover {
+  color: #2980b9;
+}
