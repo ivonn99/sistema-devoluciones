@@ -8,11 +8,9 @@ import "./TablaDevoluciones.css";
 const convertirAHoraCDMX = (fechaUTC) => {
   if (!fechaUTC) return "-";
   
-  // Crear fecha y restar 6 horas en milisegundos (6 * 60 * 60 * 1000)
   const fechaOriginal = new Date(fechaUTC);
   const cdmxDate = new Date(fechaOriginal.getTime() - (6 * 60 * 60 * 1000));
   
-  // Formatear manualmente usando UTC (ya ajustado con -6 horas)
   const dia = String(cdmxDate.getUTCDate()).padStart(2, '0');
   const mes = String(cdmxDate.getUTCMonth() + 1).padStart(2, '0');
   const año = cdmxDate.getUTCFullYear();
@@ -27,7 +25,6 @@ const convertirAHoraCDMX = (fechaUTC) => {
 const convertirSoloFechaCDMX = (fechaUTC) => {
   if (!fechaUTC) return "-";
   
-  // Crear fecha y restar 6 horas en milisegundos
   const fechaOriginal = new Date(fechaUTC);
   const cdmxDate = new Date(fechaOriginal.getTime() - (6 * 60 * 60 * 1000));
   
@@ -42,16 +39,13 @@ const TablaDevoluciones = () => {
   const { devoluciones, fetchDevoluciones, loading } = useDevolucionesStore();
   const [selectedDevolucion, setSelectedDevolucion] = useState(null);
   
-  // Estados para la búsqueda independiente
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // Estados para paginación de tabla principal
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Estados para paginación de búsqueda
   const [searchPage, setSearchPage] = useState(1);
   const [searchItemsPerPage, setSearchItemsPerPage] = useState(10);
 
@@ -60,7 +54,6 @@ const TablaDevoluciones = () => {
     fetchDevoluciones();
   }, [fetchDevoluciones]);
 
-  // Búsqueda en tiempo real
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setSearchResults([]);
@@ -87,7 +80,6 @@ const TablaDevoluciones = () => {
     setSearchPage(1);
   }, [searchTerm, devoluciones]);
 
-  // 📊 Calcular métricas
   const metricas = {
     total: devoluciones.length,
     concluidos: devoluciones.filter(d => d.estado_actual === 'registrada_pnv').length,
@@ -96,19 +88,16 @@ const TablaDevoluciones = () => {
     pendientesRepresentante: devoluciones.filter(d => d.proceso_en === 'representante' && d.estado_actual !== 'registrada_pnv').length,
   };
 
-  // Cálculos de paginación para tabla principal
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = devoluciones.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(devoluciones.length / itemsPerPage);
 
-  // Cálculos de paginación para búsqueda
   const searchIndexOfLastItem = searchPage * searchItemsPerPage;
   const searchIndexOfFirstItem = searchIndexOfLastItem - searchItemsPerPage;
   const currentSearchItems = searchResults.slice(searchIndexOfFirstItem, searchIndexOfLastItem);
   const searchTotalPages = Math.ceil(searchResults.length / searchItemsPerPage);
 
-  // Funciones de paginación tabla principal
   const goToPage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -118,7 +107,6 @@ const TablaDevoluciones = () => {
     setCurrentPage(1);
   };
 
-  // Funciones de paginación búsqueda
   const goToSearchPage = (pageNumber) => {
     setSearchPage(pageNumber);
   };
@@ -128,7 +116,6 @@ const TablaDevoluciones = () => {
     setSearchPage(1);
   };
 
-  // Generar números de página visibles
   const getPageNumbers = (current, total) => {
     const pages = [];
     const maxVisible = 5;
@@ -244,7 +231,6 @@ const TablaDevoluciones = () => {
           )}
         </div>
 
-        {/* Resultados de búsqueda */}
         {showSearchResults && (
           <div className="busqueda-resultados">
             <div className="busqueda-header">
@@ -281,19 +267,30 @@ const TablaDevoluciones = () => {
                     <tbody>
                       {currentSearchItems.map((dev) => (
                         <tr key={dev.id} className={`estado-${dev.estado_actual}`}>
-                          <td>{dev.numero_nota || "-"}</td>
-                          {/* 🕐 Usar conversión manual a CDMX */}
-                          <td>{convertirSoloFechaCDMX(dev.fecha_devolucion)}</td>
-                          <td>{dev.cliente}</td>
-                          <td>{dev.empresa}</td>
-                          <td>{dev.tipo_cliente}</td>
-                          <td>{dev.motivo_devolucion_general}</td>
-                          <td>
+                          <td data-label="Número de nota">
+                            <span className="td-content">{dev.numero_nota || "-"}</span>
+                          </td>
+                          <td data-label="Fecha devolución">
+                            <span className="td-content">{convertirSoloFechaCDMX(dev.fecha_devolucion)}</span>
+                          </td>
+                          <td data-label="Cliente">
+                            <span className="td-content">{dev.cliente}</span>
+                          </td>
+                          <td data-label="Empresa">
+                            <span className="td-content">{dev.empresa}</span>
+                          </td>
+                          <td data-label="Tipo cliente">
+                            <span className="td-content">{dev.tipo_cliente}</span>
+                          </td>
+                          <td data-label="Motivo">
+                            <span className="td-content">{dev.motivo_devolucion_general}</span>
+                          </td>
+                          <td data-label="Estado">
                             <span className={`badge-estado ${dev.estado_actual}`}>
                               {dev.estado_actual}
                             </span>
                           </td>
-                          <td>
+                          <td data-label="Acciones">
                             <button className="btn-ver" onClick={() => abrirDetalles(dev)}>
                               <Eye size={16} color="currentColor" /> Ver
                             </button>
@@ -304,7 +301,6 @@ const TablaDevoluciones = () => {
                   </table>
                 </div>
 
-                {/* Paginación de búsqueda */}
                 {searchTotalPages > 1 && (
                   <div className="pagination-container">
                     <div className="pagination-info">
@@ -388,28 +384,45 @@ const TablaDevoluciones = () => {
             <tbody>
               {currentItems.map((dev) => (
                 <tr key={dev.id} className={`estado-${dev.estado_actual}`}>
-                  <td>{dev.numero_nota || "-"}</td>  
-                  {/* 🕐 Usar conversión manual a CDMX */}
-                  <td>{convertirSoloFechaCDMX(dev.fecha_devolucion)}</td>
-                  <td>{dev.cliente}</td>
-                  <td>{dev.empresa}</td>
-                  <td>{dev.tipo_cliente}</td>
-                  <td>{dev.motivo_devolucion_general}</td>
-                  <td>{dev.dias_diferencia ?? "-"}</td>
-                  <td>
-                    {dev.dentro_plazo === null
-                      ? "-"
-                      : dev.dentro_plazo
-                      ? "✅ Sí"
-                      : "❌ No"}
+                  <td data-label="Número de nota">
+                    <span className="td-content">{dev.numero_nota || "-"}</span>
                   </td>
-                  <td>{dev.dias_transcurridos ?? "-"}</td>
-                  <td>
+                  <td data-label="Fecha devolución">
+                    <span className="td-content">{convertirSoloFechaCDMX(dev.fecha_devolucion)}</span>
+                  </td>
+                  <td data-label="Cliente">
+                    <span className="td-content">{dev.cliente}</span>
+                  </td>
+                  <td data-label="Empresa">
+                    <span className="td-content">{dev.empresa}</span>
+                  </td>
+                  <td data-label="Tipo cliente">
+                    <span className="td-content">{dev.tipo_cliente}</span>
+                  </td>
+                  <td data-label="Motivo">
+                    <span className="td-content">{dev.motivo_devolucion_general}</span>
+                  </td>
+                  <td data-label="Días diferencia">
+                    <span className="td-content">{dev.dias_diferencia ?? "-"}</span>
+                  </td>
+                  <td data-label="Dentro plazo">
+                    <span className="td-content">
+                      {dev.dentro_plazo === null
+                        ? "-"
+                        : dev.dentro_plazo
+                        ? "✅ Sí"
+                        : "❌ No"}
+                    </span>
+                  </td>
+                  <td data-label="Días transcurridos">
+                    <span className="td-content">{dev.dias_transcurridos ?? "-"}</span>
+                  </td>
+                  <td data-label="Estado">
                     <span className={`badge-estado ${dev.estado_actual}`}>
                       {dev.estado_actual}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Acciones">
                     <button className="btn-ver" onClick={() => abrirDetalles(dev)}>
                       <Eye size={16} color="currentColor" /> Ver
                     </button>
@@ -419,7 +432,6 @@ const TablaDevoluciones = () => {
             </tbody>
           </table>
 
-          {/* Paginación tabla principal */}
           {totalPages > 1 && (
             <div className="pagination-container">
               <div className="pagination-info">
@@ -539,11 +551,11 @@ const ModalDetalles = ({ devolucion, onClose }) => {
               <li><strong>Proceso en:</strong> {devolucion.proceso_en}</li>
               <li><strong>Plazo máximo:</strong> {devolucion.plazo_maximo} días</li>
               <li>
-                <strong>🧮 Días entre remisión y devolución:</strong>{" "}
+                <strong>Días entre remisión y devolución:</strong>{" "}
                 {devolucion.dias_diferencia ?? "—"}
               </li>
               <li>
-                <strong>📅 Dentro del plazo:</strong>{" "}
+                <strong>Dentro del plazo:</strong>{" "}
                 {devolucion.dentro_plazo === null
                   ? "—"
                   : devolucion.dentro_plazo
@@ -551,27 +563,26 @@ const ModalDetalles = ({ devolucion, onClose }) => {
                   : "❌ No"}
               </li>
               <li>
-                <strong>⏱️ Días transcurridos:</strong>{" "}
+                <strong>Días transcurridos:</strong>{" "}
                 {devolucion.dias_transcurridos ?? "—"}
               </li>
-              {/* 🕐 Mostrar fechas del sistema con hora CDMX */}
               <li>
-                <strong>🕐 Registrado en sistema:</strong>{" "}
+                <strong>Registrado en sistema:</strong>{" "}
                 {convertirAHoraCDMX(devolucion.created_at)}
               </li>
               <li>
-                <strong>🕐 Última actualización:</strong>{" "}
+                <strong>Última actualización:</strong>{" "}
                 {convertirAHoraCDMX(devolucion.updated_at)}
               </li>
               {devolucion.fecha_registro_almacen && (
                 <li>
-                  <strong>🕐 Registro en almacén:</strong>{" "}
+                  <strong>Registro en almacén:</strong>{" "}
                   {convertirAHoraCDMX(devolucion.fecha_registro_almacen)}
                 </li>
               )}
               {devolucion.fecha_registrada_pnv && (
                 <li>
-                  <strong>🕐 Registrada en PNV:</strong>{" "}
+                  <strong>Registrada en PNV:</strong>{" "}
                   {convertirAHoraCDMX(devolucion.fecha_registrada_pnv)}
                 </li>
               )}
@@ -598,12 +609,12 @@ const ModalDetalles = ({ devolucion, onClose }) => {
                 <tbody>
                   {devolucion.devoluciones_detalle.map((p, i) => (
                     <tr key={p.id || i}>
-                      <td>{i + 1}</td>
-                      <td>{p.concepto_sustancia}</td>
-                      <td>{p.cantidad}</td>
-                      <td>{p.estado_producto}</td>
-                      <td>{p.motivo_devolucion_producto}</td>
-                      <td>{p.comentarios || "-"}</td>
+                      <td data-label="#">{i + 1}</td>
+                      <td data-label="Concepto / Sustancia">{p.concepto_sustancia}</td>
+                      <td data-label="Cantidad">{p.cantidad}</td>
+                      <td data-label="Estado">{p.estado_producto}</td>
+                      <td data-label="Motivo">{p.motivo_devolucion_producto}</td>
+                      <td data-label="Comentarios">{p.comentarios || "-"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -629,7 +640,7 @@ const ModalDetalles = ({ devolucion, onClose }) => {
                       <th>Fecha cambio</th>
                       <th>Área</th>
                       <th>Acción</th>
-                      <th>Cambiado por</th>
+                      <th>Cambio por</th>
                       <th>Estado anterior</th>
                       <th>Estado nuevo</th>
                       <th>Proceso anterior</th>
@@ -641,18 +652,17 @@ const ModalDetalles = ({ devolucion, onClose }) => {
                   <tbody>
                     {seguimiento.map((s, i) => (
                       <tr key={s.id}>
-                        <td>{i + 1}</td>
-                        {/* 🕐 Usar conversión manual a CDMX con hora completa */}
-                        <td>{convertirAHoraCDMX(s.fecha_cambio)}</td>
-                        <td>{s.area}</td>
-                        <td>{s.accion}</td>
-                        <td>{s.cambiado_por}</td>
-                        <td>{s.estado_anterior || "-"}</td>
-                        <td>{s.estado_nuevo}</td>
-                        <td>{s.proceso_anterior || "-"}</td>
-                        <td>{s.proceso_nuevo}</td>
-                        <td>{s.motivo || "-"}</td>
-                        <td>{s.observaciones || "-"}</td>
+                        <td data-label="#">{i + 1}</td>
+                        <td data-label="Fecha cambio">{convertirAHoraCDMX(s.fecha_cambio)}</td>
+                        <td data-label="Área">{s.area}</td>
+                        <td data-label="Acción">{s.accion}</td>
+                        <td data-label="Cambio por">{s.cambiado_por}</td>
+                        <td data-label="Estado anterior">{s.estado_anterior || "-"}</td>
+                        <td data-label="Estado nuevo">{s.estado_nuevo}</td>
+                        <td data-label="Proceso anterior">{s.proceso_anterior || "-"}</td>
+                        <td data-label="Proceso nuevo">{s.proceso_nuevo}</td>
+                        <td data-label="Motivo">{s.motivo || "-"}</td>
+                        <td data-label="Observaciones">{s.observaciones || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
