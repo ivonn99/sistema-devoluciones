@@ -622,7 +622,7 @@ const ModalDetalles = ({ devolucion, onClose }) => {
             )}
           </section>
 
-          {/* Seguimiento */}
+          {/* Seguimiento - VERSIÓN MEJORADA */}
           <section className="bloque">
             <h3>
               <Clock size={16} color="#3b82f6" /> Historial de Seguimiento
@@ -632,41 +632,88 @@ const ModalDetalles = ({ devolucion, onClose }) => {
             ) : seguimiento.length === 0 ? (
               <p>No hay movimientos registrados.</p>
             ) : (
-              <div className="tabla-scroll">
-                <table className="tabla">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Fecha cambio</th>
-                      <th>Área</th>
-                      <th>Acción</th>
-                      <th>Cambio por</th>
-                      <th>Estado anterior</th>
-                      <th>Estado nuevo</th>
-                      <th>Proceso anterior</th>
-                      <th>Proceso nuevo</th>
-                      <th>Motivo</th>
-                      <th>Observaciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {seguimiento.map((s, i) => (
-                      <tr key={s.id}>
-                        <td data-label="#">{i + 1}</td>
-                        <td data-label="Fecha cambio">{convertirAHoraCDMX(s.fecha_cambio)}</td>
-                        <td data-label="Área">{s.area}</td>
-                        <td data-label="Acción">{s.accion}</td>
-                        <td data-label="Cambio por">{s.cambiado_por}</td>
-                        <td data-label="Estado anterior">{s.estado_anterior || "-"}</td>
-                        <td data-label="Estado nuevo">{s.estado_nuevo}</td>
-                        <td data-label="Proceso anterior">{s.proceso_anterior || "-"}</td>
-                        <td data-label="Proceso nuevo">{s.proceso_nuevo}</td>
-                        <td data-label="Motivo">{s.motivo || "-"}</td>
-                        <td data-label="Observaciones">{s.observaciones || "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="seguimiento-lista">
+                {seguimiento.map((s, i) => (
+                  <div key={s.id} className="seguimiento-card">
+                    {/* Header de la tarjeta */}
+                    <div className="seguimiento-header">
+                      <span className="seguimiento-numero">#{seguimiento.length - i}</span>
+                      <span className="seguimiento-fecha">{convertirAHoraCDMX(s.fecha_cambio)}</span>
+                    </div>
+
+                    {/* Información principal */}
+                    <div className="seguimiento-body">
+                      <div className="seguimiento-row">
+                        <div className="seguimiento-field">
+                          <span className="field-label">Área</span>
+                          <span className="field-value badge-area">{s.area}</span>
+                        </div>
+                        <div className="seguimiento-field">
+                          <span className="field-label">Acción</span>
+                          <span className="field-value badge-accion">{s.accion}</span>
+                        </div>
+                      </div>
+
+                      <div className="seguimiento-row">
+                        <div className="seguimiento-field">
+                          <span className="field-label">Cambio por</span>
+                          <span className="field-value">{s.cambiado_por}</span>
+                        </div>
+                      </div>
+
+                      {/* Cambios de estado */}
+                      {(s.estado_anterior || s.estado_nuevo) && (
+                        <div className="seguimiento-cambio">
+                          <span className="cambio-label">Estado:</span>
+                          <div className="cambio-flujo">
+                            {s.estado_anterior && (
+                              <span className={`badge-estado ${s.estado_anterior}`}>
+                                {s.estado_anterior}
+                              </span>
+                            )}
+                            {s.estado_anterior && s.estado_nuevo && (
+                              <span className="cambio-flecha">→</span>
+                            )}
+                            <span className={`badge-estado ${s.estado_nuevo}`}>
+                              {s.estado_nuevo}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Cambios de proceso */}
+                      {(s.proceso_anterior || s.proceso_nuevo) && (
+                        <div className="seguimiento-cambio">
+                          <span className="cambio-label">Proceso:</span>
+                          <div className="cambio-flujo">
+                            {s.proceso_anterior && (
+                              <span className="badge-proceso">{s.proceso_anterior}</span>
+                            )}
+                            {s.proceso_anterior && s.proceso_nuevo && (
+                              <span className="cambio-flecha">→</span>
+                            )}
+                            <span className="badge-proceso">{s.proceso_nuevo}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Motivo y observaciones */}
+                      {s.motivo && (
+                        <div className="seguimiento-field full-width">
+                          <span className="field-label">Motivo</span>
+                          <span className="field-value">{s.motivo}</span>
+                        </div>
+                      )}
+
+                      {s.observaciones && (
+                        <div className="seguimiento-field full-width">
+                          <span className="field-label">Observaciones</span>
+                          <span className="field-value">{s.observaciones}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </section>
