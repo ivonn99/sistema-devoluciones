@@ -305,7 +305,7 @@ const NuevoRegistro = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Fecha de Remisión</label>
+              <label className="form-label">Fecha de Remisión (fecha de salida)</label>
               <input
                 type="date"
                 name="fecha_remision"
