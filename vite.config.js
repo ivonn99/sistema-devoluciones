@@ -8,5 +8,10 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     copyPublicDir: true
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+    allowedHosts: ['sistema-devoluciones-ncah.onrender.com', 'localhost']
   }
 })
