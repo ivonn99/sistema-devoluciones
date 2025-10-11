@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "npm run build && vite preview --host",
+    "start": "vite preview --host",
     "lint": "eslint ."
   },
   "dependencies": {
