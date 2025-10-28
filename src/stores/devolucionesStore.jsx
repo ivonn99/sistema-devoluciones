@@ -1,13 +1,12 @@
+// stores/devolucionesStore.jsx
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
 
 // 🕐 Helper para convertir timestamp a hora CDMX para GUARDAR en BD
 const obtenerFechaCDMXParaBD = () => {
-  // Obtener fecha actual en CDMX
   const fecha = new Date();
   const fechaCDMX = new Date(fecha.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
   
-  // Formatear como timestamp sin zona horaria (como lo espera Supabase)
   const year = fechaCDMX.getFullYear();
   const month = String(fechaCDMX.getMonth() + 1).padStart(2, '0');
   const day = String(fechaCDMX.getDate()).padStart(2, '0');
@@ -22,8 +21,6 @@ const obtenerFechaCDMXParaBD = () => {
 const convertirAHoraCDMX = (fechaBD) => {
   if (!fechaBD) return null;
   
-  // Supabase devuelve timestamps sin zona horaria
-  // Los interpretamos como si ya fueran hora local CDMX
   const fecha = new Date(fechaBD.replace(' ', 'T'));
   
   return fecha.toLocaleString('es-MX', {
@@ -41,13 +38,11 @@ const convertirAHoraCDMX = (fechaBD) => {
 const enriquecerConFechasCDMX = (devolucion) => {
   return {
     ...devolucion,
-    // Mantener fechas originales con sufijo _utc
     created_at_utc: devolucion.created_at,
     updated_at_utc: devolucion.updated_at,
     fecha_registro_almacen_utc: devolucion.fecha_registro_almacen,
     fecha_registrada_pnv_utc: devolucion.fecha_registrada_pnv,
     
-    // Agregar versiones en CDMX
     created_at_cdmx: convertirAHoraCDMX(devolucion.created_at),
     updated_at_cdmx: convertirAHoraCDMX(devolucion.updated_at),
     fecha_registro_almacen_cdmx: convertirAHoraCDMX(devolucion.fecha_registro_almacen),
@@ -60,14 +55,12 @@ const useDevolucionesStore = create((set, get) => ({
   loading: false,
   error: null,
 
-  // Calcular días transcurridos desde la devolución hasta hoy
   calcularDiasTranscurridos: (fechaDevolucion) => {
     const fechaActual = new Date();
     const fechaDev = new Date(fechaDevolucion);
     return Math.floor((fechaActual - fechaDev) / (1000 * 60 * 60 * 24));
   },
 
-  // Obtener todas las devoluciones
   fetchDevoluciones: async (filtros = {}) => {
     set({ loading: true, error: null });
     try {
@@ -79,7 +72,6 @@ const useDevolucionesStore = create((set, get) => ({
         `)
         .order('created_at', { ascending: false });
 
-      // Aplicar filtros si existen
       if (filtros.empresa) {
         query = query.eq('empresa', filtros.empresa);
       }
@@ -94,14 +86,13 @@ const useDevolucionesStore = create((set, get) => ({
 
       if (error) throw error;
 
-      // 🔹 Enriquecer datos con días transcurridos Y fechas CDMX
       const fechaActual = new Date();
       const devolucionesEnriquecidas = (data || []).map(dev => {
         const fechaDev = new Date(dev.fecha_devolucion);
         const dias_transcurridos = Math.floor((fechaActual - fechaDev) / (1000 * 60 * 60 * 24));
         
         return {
-          ...enriquecerConFechasCDMX(dev), // 🕐 Agregar fechas CDMX
+          ...enriquecerConFechasCDMX(dev),
           dias_transcurridos
         };
       });
@@ -114,7 +105,6 @@ const useDevolucionesStore = create((set, get) => ({
     }
   },
 
-  // Calcular días de diferencia entre fechas
   calcularDiasDiferencia: (fechaRemision, fechaDevolucion) => {
     const remision = new Date(fechaRemision);
     const devolucion = new Date(fechaDevolucion);
@@ -123,7 +113,6 @@ const useDevolucionesStore = create((set, get) => ({
     return diffDays;
   },
 
-  // Determinar tipo de excepción AUTOMÁTICAMENTE
   determinarExcepcion: (dentroPlazo, contieneProductoNoDevolvible) => {
     if (contieneProductoNoDevolvible && !dentroPlazo) {
       return 'producto_no_devoluble';
@@ -137,11 +126,10 @@ const useDevolucionesStore = create((set, get) => ({
     return null;
   },
 
-  // Crear una nueva devolución
   createDevolucion: async (devolucionData) => {
     set({ loading: true, error: null });
     try {
-      const { productos, ...devolucionInfo } = devolucionData;
+      const { productos, vendedor_nombre, ...devolucionInfo } = devolucionData;
 
       const plazoMaximo = {
         'local': 7,
@@ -168,8 +156,10 @@ const useDevolucionesStore = create((set, get) => ({
         procesoInicial = 'representante';
       }
 
+      // 🔹 Mapear vendedor_nombre a vendedor para la BD
       const devolucionParaInsertar = {
         ...devolucionInfo,
+        vendedor: vendedor_nombre, // 👈 Aquí mapeamos el campo
         plazo_maximo: plazoMaximo,
         tipo_excepcion: tipoExcepcion,
         fecha_registro_almacen: new Date().toISOString(),
@@ -242,9 +232,8 @@ const useDevolucionesStore = create((set, get) => ({
 
       if (errorCompleta) throw errorCompleta;
 
-      // 🔹 Agregar días transcurridos Y fechas CDMX
       const devolucionConDiasTranscurridos = {
-        ...enriquecerConFechasCDMX(devolucionCompleta), // 🕐 Agregar fechas CDMX
+        ...enriquecerConFechasCDMX(devolucionCompleta),
         dias_transcurridos: get().calcularDiasTranscurridos(devolucionCompleta.fecha_devolucion)
       };
 
@@ -267,18 +256,21 @@ const useDevolucionesStore = create((set, get) => ({
     }
   },
 
-  // Actualizar una devolución
   updateDevolucion: async (id, devolucionData) => {
     set({ loading: true, error: null });
     try {
-      const { productos, ...devolucionInfo } = devolucionData;
+      const { productos, vendedor_nombre, ...devolucionInfo } = devolucionData;
+
+      // 🔹 Mapear vendedor_nombre a vendedor si existe
+      const dataToUpdate = {
+        ...devolucionInfo,
+        ...(vendedor_nombre && { vendedor: vendedor_nombre }),
+        updated_at: new Date().toISOString()
+      };
 
       const { data: devolucion, error: errorDevolucion } = await supabase
         .from('devoluciones')
-        .update({
-          ...devolucionInfo,
-          updated_at: new Date().toISOString()
-        })
+        .update(dataToUpdate)
         .eq('id', id)
         .select()
         .single();
@@ -318,9 +310,8 @@ const useDevolucionesStore = create((set, get) => ({
         .eq('id', id)
         .single();
 
-      // 🔹 Agregar días transcurridos Y fechas CDMX
       const devolucionConDiasTranscurridos = {
-        ...enriquecerConFechasCDMX(devolucionCompleta), // 🕐 Agregar fechas CDMX
+        ...enriquecerConFechasCDMX(devolucionCompleta),
         dias_transcurridos: get().calcularDiasTranscurridos(devolucionCompleta.fecha_devolucion)
       };
 
@@ -338,7 +329,6 @@ const useDevolucionesStore = create((set, get) => ({
     }
   },
 
-  // Actualizar estado de una devolución
   updateEstado: async (id, nuevoEstado, nuevoProceso, motivo = null, usuarioActual = 'sistema') => {
     set({ loading: true, error: null });
     try {
@@ -389,9 +379,8 @@ const useDevolucionesStore = create((set, get) => ({
           observaciones: `Estado cambiado de ${devolucionActual?.estado_actual} a ${nuevoEstado}`
         }]);
 
-      // 🔹 Agregar días transcurridos Y fechas CDMX
       const devolucionConDiasTranscurridos = {
-        ...enriquecerConFechasCDMX(data), // 🕐 Agregar fechas CDMX
+        ...enriquecerConFechasCDMX(data),
         dias_transcurridos: get().calcularDiasTranscurridos(data.fecha_devolucion)
       };
 
@@ -409,7 +398,6 @@ const useDevolucionesStore = create((set, get) => ({
     }
   },
 
-  // 🆕 APROBAR Y REGISTRAR EN PNV (Función específica para Crédito)
   aprobarYRegistrarPNV: async (id, observaciones_credito = '', usuarioActual = 'sistema') => {
     set({ loading: true, error: null });
     try {
@@ -421,7 +409,6 @@ const useDevolucionesStore = create((set, get) => ({
 
       const ahora = new Date().toISOString();
 
-      // Actualizar devolución con campos específicos de PNV
       const { data, error } = await supabase
         .from('devoluciones')
         .update({
@@ -441,7 +428,6 @@ const useDevolucionesStore = create((set, get) => ({
 
       if (error) throw error;
 
-      // Registrar en seguimiento
       await supabase
         .from('devoluciones_seguimiento')
         .insert([{
@@ -456,9 +442,8 @@ const useDevolucionesStore = create((set, get) => ({
           observaciones: `Aprobada por Crédito y registrada en PNV. ${observaciones_credito ? 'Obs: ' + observaciones_credito : ''}`
         }]);
 
-      // 🔹 Agregar días transcurridos Y fechas CDMX
       const devolucionConDiasTranscurridos = {
-        ...enriquecerConFechasCDMX(data), // 🕐 Agregar fechas CDMX
+        ...enriquecerConFechasCDMX(data),
         dias_transcurridos: get().calcularDiasTranscurridos(data.fecha_devolucion)
       };
 
@@ -477,7 +462,6 @@ const useDevolucionesStore = create((set, get) => ({
     }
   },
 
-  // Eliminar una devolución
   deleteDevolucion: async (id) => {
     set({ loading: true, error: null });
     try {
@@ -500,7 +484,6 @@ const useDevolucionesStore = create((set, get) => ({
     }
   },
 
-  // Limpiar errores
   clearError: () => set({ error: null }),
 }));
 
