@@ -54,6 +54,18 @@ const useDevolucionesStore = create((set, get) => ({
   devoluciones: [],
   loading: false,
   error: null,
+  
+  // 🆕 Estados para infinite scroll
+  hasMore: true,
+  currentPage: 0,
+  pageSize: 50,
+  totalCount: 0,
+  
+  // 🆕 Estados para búsqueda en servidor
+  searchResults: [],
+  searchLoading: false,
+  searchHasMore: true,
+  searchPage: 0,
 
   calcularDiasTranscurridos: (fechaDevolucion) => {
     const fechaActual = new Date();
@@ -61,17 +73,27 @@ const useDevolucionesStore = create((set, get) => ({
     return Math.floor((fechaActual - fechaDev) / (1000 * 60 * 60 * 24));
   },
 
-  fetchDevoluciones: async (filtros = {}) => {
+  // 🆕 Fetch inicial con paginación
+  fetchDevoluciones: async (filtros = {}, reset = false) => {
     set({ loading: true, error: null });
     try {
+      const state = get();
+      const page = reset ? 0 : state.currentPage;
+      const pageSize = state.pageSize;
+      
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+
       let query = supabase
         .from('devoluciones')
         .select(`
           *,
           devoluciones_detalle (*)
-        `)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
+      // Aplicar filtros si existen
       if (filtros.empresa) {
         query = query.eq('empresa', filtros.empresa);
       }
@@ -81,8 +103,20 @@ const useDevolucionesStore = create((set, get) => ({
       if (filtros.proceso_en) {
         query = query.eq('proceso_en', filtros.proceso_en);
       }
+      if (filtros.tipo_cliente) {
+        query = query.eq('tipo_cliente', filtros.tipo_cliente);
+      }
+      if (filtros.dentro_plazo !== '') {
+        query = query.eq('dentro_plazo', filtros.dentro_plazo === 'si');
+      }
+      if (filtros.fecha_desde) {
+        query = query.gte('fecha_devolucion', filtros.fecha_desde);
+      }
+      if (filtros.fecha_hasta) {
+        query = query.lte('fecha_devolucion', filtros.fecha_hasta);
+      }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
@@ -97,12 +131,120 @@ const useDevolucionesStore = create((set, get) => ({
         };
       });
 
-      set({ devoluciones: devolucionesEnriquecidas, loading: false });
-      return { success: true, data: devolucionesEnriquecidas };
+      set({ 
+        devoluciones: reset ? devolucionesEnriquecidas : [...state.devoluciones, ...devolucionesEnriquecidas],
+        currentPage: page + 1,
+        hasMore: (page + 1) * pageSize < count,
+        totalCount: count,
+        loading: false 
+      });
+      
+      return { success: true, data: devolucionesEnriquecidas, count };
     } catch (error) {
       set({ error: error.message, loading: false });
       return { success: false, error: error.message };
     }
+  },
+
+  // 🆕 Reset para cuando cambien filtros
+  resetDevoluciones: () => {
+    set({ 
+      devoluciones: [], 
+      currentPage: 0, 
+      hasMore: true,
+      totalCount: 0 
+    });
+  },
+
+  // 🆕 Búsqueda en servidor
+  searchDevoluciones: async (searchTerm, filtros = {}, reset = false) => {
+    if (!searchTerm || searchTerm.trim() === '') {
+      set({ searchResults: [], searchHasMore: true, searchPage: 0 });
+      return { success: true, data: [] };
+    }
+
+    set({ searchLoading: true, error: null });
+    try {
+      const state = get();
+      const page = reset ? 0 : state.searchPage;
+      const pageSize = 50;
+      
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+
+      const term = searchTerm.toLowerCase();
+
+      let query = supabase
+        .from('devoluciones')
+        .select(`
+          *,
+          devoluciones_detalle (*)
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      // Búsqueda por múltiples campos
+      query = query.or(
+        `numero_nota.ilike.%${term}%,` +
+        `cliente.ilike.%${term}%,` +
+        `empresa.ilike.%${term}%,` +
+        `vendedor_nombre.ilike.%${term}%,` +
+        `motivo_devolucion_general.ilike.%${term}%,` +
+        `estado_actual.ilike.%${term}%,` +
+        `proceso_en.ilike.%${term}%`
+      );
+
+      // Aplicar filtros adicionales
+      if (filtros.empresa) {
+        query = query.eq('empresa', filtros.empresa);
+      }
+      if (filtros.estado_actual) {
+        query = query.eq('estado_actual', filtros.estado_actual);
+      }
+      if (filtros.proceso_en) {
+        query = query.eq('proceso_en', filtros.proceso_en);
+      }
+      if (filtros.tipo_cliente) {
+        query = query.eq('tipo_cliente', filtros.tipo_cliente);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      const fechaActual = new Date();
+      const resultadosEnriquecidos = (data || []).map(dev => {
+        const fechaDev = new Date(dev.fecha_devolucion);
+        const dias_transcurridos = Math.floor((fechaActual - fechaDev) / (1000 * 60 * 60 * 24));
+        
+        return {
+          ...enriquecerConFechasCDMX(dev),
+          dias_transcurridos
+        };
+      });
+
+      set({ 
+        searchResults: reset ? resultadosEnriquecidos : [...state.searchResults, ...resultadosEnriquecidos],
+        searchPage: page + 1,
+        searchHasMore: (page + 1) * pageSize < count,
+        searchLoading: false 
+      });
+
+      return { success: true, data: resultadosEnriquecidos, count };
+    } catch (error) {
+      console.error('❌ Error en búsqueda:', error);
+      set({ error: error.message, searchLoading: false });
+      return { success: false, error: error.message };
+    }
+  },
+
+  // 🆕 Reset búsqueda
+  resetSearch: () => {
+    set({ 
+      searchResults: [], 
+      searchPage: 0, 
+      searchHasMore: true 
+    });
   },
 
   calcularDiasDiferencia: (fechaRemision, fechaDevolucion) => {
@@ -237,6 +379,7 @@ const useDevolucionesStore = create((set, get) => ({
 
       set((state) => ({
         devoluciones: [devolucionConDiasTranscurridos, ...state.devoluciones],
+        totalCount: state.totalCount + 1,
         loading: false,
       }));
 
@@ -470,6 +613,7 @@ const useDevolucionesStore = create((set, get) => ({
 
       set((state) => ({
         devoluciones: state.devoluciones.filter((dev) => dev.id !== id),
+        totalCount: state.totalCount - 1,
         loading: false,
       }));
 

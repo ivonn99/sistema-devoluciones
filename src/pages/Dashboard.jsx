@@ -1,7 +1,7 @@
 // pages/Dashboard.jsx
-import { Package, FileText, CreditCard, Warehouse, Users, LogOut, Eye, Search, X, Filter, RefreshCw } from 'lucide-react';
+import { Package, FileText, CreditCard, Warehouse, Users, LogOut, Search, X, Filter, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useAuthStore from '../stores/authStore';
 import useDevolucionesStore from '../stores/devolucionesStore';
 import TablaDevoluciones from './devoluciones/TablaDevoluciones';
@@ -10,13 +10,21 @@ import './Dashboard.css';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuthStore();
-  const { devoluciones, fetchDevoluciones, loading } = useDevolucionesStore();
+  const { 
+    devoluciones,
+    searchResults,
+    fetchDevoluciones, 
+    searchDevoluciones,
+    resetDevoluciones,
+    resetSearch,
+    loading,
+    searchLoading 
+  } = useDevolucionesStore();
   
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchDebounceTimer, setSearchDebounceTimer] = useState(null);
   
-  // 🆕 Estados para filtros avanzados
+  // Estados para filtros avanzados
   const [filters, setFilters] = useState({
     empresa: '',
     tipo_cliente: '',
@@ -27,89 +35,60 @@ const Dashboard = () => {
     dentro_plazo: ''
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [devolucionesFiltradas, setDevolucionesFiltradas] = useState([]);
 
+  // Verificar si hay filtros activos
+  const hayFiltrosActivos = Object.values(filters).some(value => value !== '');
+
+  // 🆕 Carga inicial con filtros
   useEffect(() => {
     console.log("🟢 Cargando lista de devoluciones desde Dashboard...");
-    fetchDevoluciones();
-  }, [fetchDevoluciones]);
+    resetDevoluciones();
+    fetchDevoluciones(filters, true);
+  }, []);
 
-  // 🆕 Aplicar filtros avanzados
+  // 🆕 Recargar cuando cambien los filtros
   useEffect(() => {
-    let resultado = [...devoluciones];
+    console.log("🔄 Filtros cambiados, recargando...");
+    resetDevoluciones();
+    resetSearch();
+    setSearchTerm("");
+    fetchDevoluciones(filters, true);
+  }, [filters]);
 
-    // Filtro por empresa
-    if (filters.empresa) {
-      resultado = resultado.filter(dev => dev.empresa === filters.empresa);
-    }
-
-    // Filtro por tipo de cliente
-    if (filters.tipo_cliente) {
-      resultado = resultado.filter(dev => dev.tipo_cliente === filters.tipo_cliente);
-    }
-
-    // Filtro por estado actual
-    if (filters.estado_actual) {
-      resultado = resultado.filter(dev => dev.estado_actual === filters.estado_actual);
-    }
-
-    // Filtro por proceso
-    if (filters.proceso_en) {
-      resultado = resultado.filter(dev => dev.proceso_en === filters.proceso_en);
-    }
-
-    // Filtro por rango de fechas
-    if (filters.fecha_desde) {
-      resultado = resultado.filter(dev => 
-        new Date(dev.fecha_devolucion) >= new Date(filters.fecha_desde)
-      );
-    }
-
-    if (filters.fecha_hasta) {
-      resultado = resultado.filter(dev => 
-        new Date(dev.fecha_devolucion) <= new Date(filters.fecha_hasta)
-      );
-    }
-
-    // Filtro por dentro de plazo
-    if (filters.dentro_plazo !== '') {
-      const dentroPlazo = filters.dentro_plazo === 'si';
-      resultado = resultado.filter(dev => dev.dentro_plazo === dentroPlazo);
-    }
-
-    setDevolucionesFiltradas(resultado);
-  }, [devoluciones, filters]);
-
-  // Búsqueda en tiempo real (sobre datos filtrados)
+  // 🆕 Búsqueda en servidor con debounce
   useEffect(() => {
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+
     if (searchTerm.trim() === "") {
-      setSearchResults([]);
-      setShowSearchResults(false);
+      resetSearch();
       return;
     }
 
-    const term = searchTerm.toLowerCase();
-    const dataParaBuscar = devolucionesFiltradas.length > 0 || Object.values(filters).some(f => f !== '') 
-      ? devolucionesFiltradas 
-      : devoluciones;
+    const timer = setTimeout(() => {
+      console.log("🔍 Buscando en servidor:", searchTerm);
+      resetSearch();
+      searchDevoluciones(searchTerm, filters, true);
+    }, 500); // Espera 500ms después de que el usuario deje de escribir
 
-    const results = dataParaBuscar.filter((dev) => {
-      return (
-        dev.numero_nota?.toLowerCase().includes(term) ||
-        dev.cliente?.toLowerCase().includes(term) ||
-        dev.empresa?.toLowerCase().includes(term) ||
-        dev.tipo_cliente?.toLowerCase().includes(term) ||
-        dev.vendedor_nombre?.toLowerCase().includes(term) ||
-        dev.motivo_devolucion_general?.toLowerCase().includes(term) ||
-        dev.estado_actual?.toLowerCase().includes(term) ||
-        dev.proceso_en?.toLowerCase().includes(term) ||
-        dev.id?.toString().includes(term)
-      );
-    });
+    setSearchDebounceTimer(timer);
 
-    setSearchResults(results);
-    setShowSearchResults(true);
-  }, [searchTerm, devoluciones, devolucionesFiltradas, filters]);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [searchTerm]);
+
+  // 🆕 Función para cargar más (infinite scroll)
+  const handleLoadMore = useCallback(() => {
+    if (searchTerm.trim() !== "") {
+      console.log("🔍 Cargando más resultados de búsqueda...");
+      searchDevoluciones(searchTerm, filters, false);
+    } else {
+      console.log("📄 Cargando más devoluciones...");
+      fetchDevoluciones(filters, false);
+    }
+  }, [searchTerm, filters, fetchDevoluciones, searchDevoluciones]);
 
   const handleLogout = () => {
     signOut();
@@ -118,11 +97,10 @@ const Dashboard = () => {
 
   const limpiarBusqueda = () => {
     setSearchTerm("");
-    setSearchResults([]);
-    setShowSearchResults(false);
+    resetSearch();
   };
 
-  // 🆕 Manejar cambios en filtros
+  // Manejar cambios en filtros
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -131,7 +109,7 @@ const Dashboard = () => {
     }));
   };
 
-  // 🆕 Limpiar todos los filtros
+  // Limpiar todos los filtros
   const limpiarFiltros = () => {
     setFilters({
       empresa: '',
@@ -142,11 +120,7 @@ const Dashboard = () => {
       fecha_hasta: '',
       dentro_plazo: ''
     });
-    setDevolucionesFiltradas([]);
   };
-
-  // 🆕 Verificar si hay filtros activos
-  const hayFiltrosActivos = Object.values(filters).some(value => value !== '');
 
   // Configuración de accesos por rol
   const accessConfig = {
@@ -212,8 +186,8 @@ const Dashboard = () => {
     ]
   };
 
-  // Métricas calculadas (sobre datos filtrados o todos)
-  const dataParaMetricas = hayFiltrosActivos ? devolucionesFiltradas : devoluciones;
+  // Métricas calculadas (sobre datos cargados actualmente)
+  const dataParaMetricas = searchTerm.trim() !== "" ? searchResults : devoluciones;
   
   const metricas = {
     total: dataParaMetricas.length,
@@ -293,7 +267,7 @@ const Dashboard = () => {
         <section className="dashboard-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="section-title">
-              {hayFiltrosActivos ? 'Resumen de Filtros Aplicados' : 'Resumen General'}
+              {hayFiltrosActivos ? 'Resumen de Filtros Aplicados' : 'Resumen de Datos Cargados'}
             </h2>
             {hayFiltrosActivos && (
               <span style={{ 
@@ -313,8 +287,10 @@ const Dashboard = () => {
             <div className="metrica-card metrica-total">
               <div className="metrica-icono"><FileText size={24} color="#3b82f6" /></div>
               <div className="metrica-info">
-                <div className="metrica-valor">{metricas.total}</div>
-                <div className="metrica-label">Total de Registros</div>
+                <div className="metrica-valor">{metricas.total}{searchTerm.trim() === "" && "+"}}</div>
+                <div className="metrica-label">
+                  {searchTerm.trim() !== "" ? "Resultados" : "Registros Cargados"}
+                </div>
               </div>
             </div>
 
@@ -350,9 +326,19 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+          {searchTerm.trim() === "" && (
+            <p style={{ 
+              fontSize: '0.875rem', 
+              color: '#6b7280', 
+              marginTop: '0.5rem',
+              textAlign: 'center'
+            }}>
+              💡 Los datos se cargan progresivamente a medida que haces scroll
+            </p>
+          )}
         </section>
 
-        {/* 🆕 Sección de filtros avanzados */}
+        {/* Sección de filtros avanzados */}
         <section className="dashboard-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2 className="section-title">Filtros Avanzados</h2>
@@ -600,22 +586,22 @@ const Dashboard = () => {
               </button>
             )}
           </div>
-          {hayFiltrosActivos && (
-            <small style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.5rem', display: 'block' }}>
-              💡 La búsqueda se aplica sobre los resultados filtrados
-            </small>
-          )}
+          <small style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.5rem', display: 'block' }}>
+            {searchLoading 
+              ? '🔍 Buscando en el servidor...' 
+              : hayFiltrosActivos
+              ? '💡 La búsqueda se aplica sobre los filtros activos'
+              : '💡 La búsqueda se realiza en el servidor (espera 0.5s después de escribir)'}
+          </small>
         </section>
 
         {/* Tabla de devoluciones */}
         <section className="dashboard-section">
           <TablaDevoluciones 
             searchTerm={searchTerm}
-            searchResults={searchResults}
-            showSearchResults={showSearchResults}
-            loading={loading}
-            devolucionesFiltradas={devolucionesFiltradas}
-            hayFiltrosActivos={hayFiltrosActivos}
+            isSearching={searchLoading || loading}
+            filters={filters}
+            onLoadMore={handleLoadMore}
           />
         </section>
       </div>

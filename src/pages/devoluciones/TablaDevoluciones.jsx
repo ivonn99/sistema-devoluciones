@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Eye, Clock } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Eye, Clock, Loader } from "lucide-react";
 import useDevolucionesStore from "../../stores/devolucionesStore";
 import { supabase } from "../../config/supabase";
 import "./TablaDevoluciones.css";
@@ -35,78 +35,51 @@ const convertirSoloFechaCDMX = (fechaUTC) => {
   return `${dia}/${mes}/${año}`;
 };
 
-const TablaDevoluciones = ({ searchTerm, searchResults, showSearchResults, loading, devolucionesFiltradas, hayFiltrosActivos }) => {
-  const { devoluciones } = useDevolucionesStore();
-  const [selectedDevolucion, setSelectedDevolucion] = useState(null);
+const TablaDevoluciones = ({ 
+  searchTerm, 
+  isSearching,
+  filters = {},
+  onLoadMore
+}) => {
+  const { 
+    devoluciones, 
+    searchResults,
+    loading, 
+    searchLoading,
+    hasMore,
+    searchHasMore,
+    totalCount 
+  } = useDevolucionesStore();
   
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedDevolucion, setSelectedDevolucion] = useState(null);
+  const observerTarget = useRef(null);
 
-  const [searchPage, setSearchPage] = useState(1);
-  const [searchItemsPerPage, setSearchItemsPerPage] = useState(10);
+  // Determinar qué datos mostrar
+  const showSearchResults = searchTerm && searchTerm.trim() !== '';
+  const dataParaMostrar = showSearchResults ? searchResults : devoluciones;
+  const isLoading = showSearchResults ? searchLoading : loading;
+  const hasMoreData = showSearchResults ? searchHasMore : hasMore;
 
-  // 🔹 Determinar qué datos mostrar
-  const dataParaMostrar = hayFiltrosActivos ? devolucionesFiltradas : devoluciones;
-
-  // Paginación para tabla principal (con filtros)
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = dataParaMostrar.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(dataParaMostrar.length / itemsPerPage);
-
-  // Paginación para búsqueda
-  const searchIndexOfLastItem = searchPage * searchItemsPerPage;
-  const searchIndexOfFirstItem = searchIndexOfLastItem - searchItemsPerPage;
-  const currentSearchItems = searchResults.slice(searchIndexOfFirstItem, searchIndexOfLastItem);
-  const searchTotalPages = Math.ceil(searchResults.length / searchItemsPerPage);
-
-  const goToPage = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handleItemsPerPageChange = (e) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  };
-
-  const goToSearchPage = (pageNumber) => {
-    setSearchPage(pageNumber);
-  };
-
-  const handleSearchItemsPerPageChange = (e) => {
-    setSearchItemsPerPage(Number(e.target.value));
-    setSearchPage(1);
-  };
-
-  const getPageNumbers = (current, total) => {
-    const pages = [];
-    const maxVisible = 5;
-
-    if (total <= maxVisible) {
-      for (let i = 1; i <= total; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (current <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push('...');
-        pages.push(total);
-      } else if (current >= total - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = total - 3; i <= total; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push('...');
-        pages.push(current - 1);
-        pages.push(current);
-        pages.push(current + 1);
-        pages.push('...');
-        pages.push(total);
-      }
+  // 🆕 Infinite Scroll Observer
+  const handleObserver = useCallback((entries) => {
+    const [target] = entries;
+    if (target.isIntersecting && hasMoreData && !isLoading) {
+      console.log("🔄 Cargando más registros...");
+      onLoadMore();
     }
-    return pages;
-  };
+  }, [hasMoreData, isLoading, onLoadMore]);
+
+  useEffect(() => {
+    const element = observerTarget.current;
+    const option = { threshold: 0.1 };
+    const observer = new IntersectionObserver(handleObserver, option);
+    
+    if (element) observer.observe(element);
+    
+    return () => {
+      if (element) observer.unobserve(element);
+    };
+  }, [handleObserver]);
 
   const abrirDetalles = (devolucion) => {
     console.log("🔍 Abriendo detalles de devolución:", devolucion);
@@ -119,7 +92,7 @@ const TablaDevoluciones = ({ searchTerm, searchResults, showSearchResults, loadi
   };
 
   // Renderizado de tabla
-  const renderTabla = (items, esBusqueda = false) => (
+  const renderTabla = (items) => (
     <table className="tabla">
       <thead>
         <tr>
@@ -194,160 +167,95 @@ const TablaDevoluciones = ({ searchTerm, searchResults, showSearchResults, loadi
 
   return (
     <div className="tabla-container">
-      {/* Resultados de búsqueda */}
-      {showSearchResults && (
-        <div className="busqueda-resultados">
-          <div className="busqueda-header">
-            <h3>Resultados de búsqueda ({searchResults.length})</h3>
-            {searchResults.length > 0 && (
-              <span className="busqueda-termino">Buscando: "{searchTerm}"</span>
-            )}
+      {/* Header con información */}
+      <div style={{ 
+        marginBottom: '1rem', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center' 
+      }}>
+        <h2 className="tabla-titulo">
+          {showSearchResults 
+            ? `Resultados de búsqueda (${dataParaMostrar.length})` 
+            : `Todas las Devoluciones (${dataParaMostrar.length}${!hasMore ? '' : '+'})`}
+        </h2>
+        
+        {showSearchResults && searchTerm && (
+          <span style={{ 
+            fontSize: '0.875rem', 
+            color: '#6b7280',
+            background: '#f3f4f6',
+            padding: '0.5rem 1rem',
+            borderRadius: '6px'
+          }}>
+            Buscando: <strong>{searchTerm}</strong>
+          </span>
+        )}
+      </div>
+
+      {/* Tabla con datos */}
+      {dataParaMostrar.length === 0 && !isLoading ? (
+        <p style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+          {showSearchResults 
+            ? `No se encontraron resultados para "${searchTerm}"` 
+            : 'No hay devoluciones registradas.'}
+        </p>
+      ) : (
+        <>
+          <div className="tabla-scroll">
+            {renderTabla(dataParaMostrar)}
           </div>
 
-          {searchResults.length === 0 ? (
-            <p className="busqueda-vacio">
-              No se encontraron devoluciones que coincidan con "{searchTerm}"
-            </p>
-          ) : (
-            <>
-              <div className="tabla-scroll">
-                {renderTabla(currentSearchItems, true)}
-              </div>
-
-              {searchTotalPages > 1 && (
-                <div className="pagination-container">
-                  <div className="pagination-info">
-                    Mostrando {searchIndexOfFirstItem + 1} - {Math.min(searchIndexOfLastItem, searchResults.length)} de {searchResults.length} resultados
-                  </div>
-                  
-                  <div className="pagination-controls">
-                    <button
-                      className="pagination-btn"
-                      onClick={() => goToSearchPage(searchPage - 1)}
-                      disabled={searchPage === 1}
-                    >
-                      Anterior
-                    </button>
-
-                    {getPageNumbers(searchPage, searchTotalPages).map((page, index) => (
-                      page === '...' ? (
-                        <span key={`ellipsis-${index}`} className="pagination-ellipsis">...</span>
-                      ) : (
-                        <button
-                          key={page}
-                          className={`pagination-number ${searchPage === page ? 'active' : ''}`}
-                          onClick={() => goToSearchPage(page)}
-                        >
-                          {page}
-                        </button>
-                      )
-                    ))}
-
-                    <button
-                      className="pagination-btn"
-                      onClick={() => goToSearchPage(searchPage + 1)}
-                      disabled={searchPage === searchTotalPages}
-                    >
-                      Siguiente
-                    </button>
-                  </div>
-
-                  <div className="pagination-selector">
-                    <label>Registros por página:</label>
-                    <select value={searchItemsPerPage} onChange={handleSearchItemsPerPageChange}>
-                      <option value={10}>10</option>
-                      <option value={25}>25</option>
-                      <option value={50}>50</option>
-                      <option value={100}>100</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Tabla principal (solo si no hay búsqueda activa) */}
-      {!showSearchResults && (
-        <>
-          <h2 className="tabla-titulo">
-            {hayFiltrosActivos 
-              ? `Devoluciones Filtradas (${dataParaMostrar.length})` 
-              : 'Todas las Devoluciones'}
-          </h2>
-          
-          {loading ? (
-            <p>Cargando devoluciones...</p>
-          ) : dataParaMostrar.length === 0 ? (
-            <p>
-              {hayFiltrosActivos 
-                ? 'No hay devoluciones que coincidan con los filtros aplicados.' 
-                : 'No hay devoluciones registradas.'}
-            </p>
-          ) : (
-            <>
-              <div className="tabla-scroll">
-                {renderTabla(currentItems)}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="pagination-container">
-                  <div className="pagination-info">
-                    Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, dataParaMostrar.length)} de {dataParaMostrar.length} devoluciones
-                  </div>
-                  
-                  <div className="pagination-controls">
-                    <button
-                      className="pagination-btn"
-                      onClick={() => goToPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      Anterior
-                    </button>
-
-                    {getPageNumbers(currentPage, totalPages).map((page, index) => (
-                      page === '...' ? (
-                        <span key={`ellipsis-${index}`} className="pagination-ellipsis">...</span>
-                      ) : (
-                        <button
-                          key={page}
-                          className={`pagination-number ${currentPage === page ? 'active' : ''}`}
-                          onClick={() => goToPage(page)}
-                        >
-                          {page}
-                        </button>
-                      )
-                    ))}
-
-                    <button
-                      className="pagination-btn"
-                      onClick={() => goToPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Siguiente
-                    </button>
-                  </div>
-
-                  <div className="pagination-selector">
-                    <label>Registros por página:</label>
-                    <select value={itemsPerPage} onChange={handleItemsPerPageChange}>
-                      <option value={10}>10</option>
-                      <option value={25}>25</option>
-                      <option value={50}>50</option>
-                      <option value={100}>100</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+          {/* 🆕 Loader y trigger para infinite scroll */}
+          <div 
+            ref={observerTarget}
+            style={{ 
+              padding: '2rem', 
+              textAlign: 'center',
+              minHeight: '60px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {isLoading && (
+              <>
+                <Loader 
+                  size={24} 
+                  color="#3b82f6" 
+                  style={{ animation: 'spin 1s linear infinite' }}
+                />
+                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                  Cargando más devoluciones...
+                </p>
+              </>
+            )}
+            
+            {!hasMoreData && dataParaMostrar.length > 0 && (
+              <p style={{ 
+                color: '#10b981', 
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>
+                ✓ Todos los registros cargados ({dataParaMostrar.length} total)
+              </p>
+            )}
+          </div>
         </>
       )}
 
       {selectedDevolucion && (
         <ModalDetalles devolucion={selectedDevolucion} onClose={cerrarDetalles} />
       )}
+      
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
