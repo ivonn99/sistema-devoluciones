@@ -129,7 +129,7 @@ const useDevolucionesStore = create((set, get) => ({
   createDevolucion: async (devolucionData) => {
     set({ loading: true, error: null });
     try {
-      const { productos, vendedor_nombre, ...devolucionInfo } = devolucionData;
+      const { productos, ...devolucionInfo } = devolucionData;
 
       const plazoMaximo = {
         'local': 7,
@@ -156,10 +156,8 @@ const useDevolucionesStore = create((set, get) => ({
         procesoInicial = 'representante';
       }
 
-      // 🔹 Mapear vendedor_nombre a vendedor para la BD
       const devolucionParaInsertar = {
         ...devolucionInfo,
-        vendedor: vendedor_nombre, // 👈 Aquí mapeamos el campo
         plazo_maximo: plazoMaximo,
         tipo_excepcion: tipoExcepcion,
         fecha_registro_almacen: new Date().toISOString(),
@@ -259,12 +257,10 @@ const useDevolucionesStore = create((set, get) => ({
   updateDevolucion: async (id, devolucionData) => {
     set({ loading: true, error: null });
     try {
-      const { productos, vendedor_nombre, ...devolucionInfo } = devolucionData;
+      const { productos, ...devolucionInfo } = devolucionData;
 
-      // 🔹 Mapear vendedor_nombre a vendedor si existe
       const dataToUpdate = {
         ...devolucionInfo,
-        ...(vendedor_nombre && { vendedor: vendedor_nombre }),
         updated_at: new Date().toISOString()
       };
 
