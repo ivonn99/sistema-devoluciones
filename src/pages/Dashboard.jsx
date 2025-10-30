@@ -287,7 +287,7 @@ const Dashboard = () => {
             <div className="metrica-card metrica-total">
               <div className="metrica-icono"><FileText size={24} color="#3b82f6" /></div>
               <div className="metrica-info">
-                <div className="metrica-valor">{metricas.total}{searchTerm.trim() === "" && "+"}}</div>
+                <div className="metrica-valor">{metricas.total}{searchTerm.trim() === "" && "+"}</div>
                 <div className="metrica-label">
                   {searchTerm.trim() !== "" ? "Resultados" : "Registros Cargados"}
                 </div>
