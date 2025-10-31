@@ -68,8 +68,10 @@ const useDevolucionesStore = create((set, get) => ({
   searchPage: 0,
 
   calcularDiasTranscurridos: (fechaDevolucion) => {
+    if (!fechaDevolucion) return 0;
     const fechaActual = new Date();
     const fechaDev = new Date(fechaDevolucion);
+    if (isNaN(fechaDev.getTime())) return 0;
     return Math.floor((fechaActual - fechaDev) / (1000 * 60 * 60 * 24));
   },
 
@@ -80,6 +82,12 @@ const useDevolucionesStore = create((set, get) => ({
       const state = get();
       const page = reset ? 0 : state.currentPage;
       const pageSize = state.pageSize;
+      
+      // 🔥 Si no hay más datos, no hacer la petición
+      if (!reset && !state.hasMore) {
+        set({ loading: false });
+        return { success: true, data: [], count: state.totalCount };
+      }
       
       const from = page * pageSize;
       const to = from + pageSize - 1;
@@ -118,7 +126,17 @@ const useDevolucionesStore = create((set, get) => ({
 
       const { data, error, count } = await query;
 
-      if (error) throw error;
+      if (error) {
+        // 🔥 Si es error 416 (rango fuera de límites), no hay más datos
+        if (error.code === 'PGRST103' || error.message?.includes('416')) {
+          set({ 
+            hasMore: false,
+            loading: false 
+          });
+          return { success: true, data: [], count: state.totalCount };
+        }
+        throw error;
+      }
 
       const fechaActual = new Date();
       const devolucionesEnriquecidas = (data || []).map(dev => {
@@ -131,18 +149,47 @@ const useDevolucionesStore = create((set, get) => ({
         };
       });
 
+      // 🔥 Determinar si hay más datos
+      const newHasMore = count > (page + 1) * pageSize;
+
       set({ 
         devoluciones: reset ? devolucionesEnriquecidas : [...state.devoluciones, ...devolucionesEnriquecidas],
         currentPage: page + 1,
-        hasMore: (page + 1) * pageSize < count,
-        totalCount: count,
+        hasMore: newHasMore,
+        totalCount: count || 0,
         loading: false 
       });
       
       return { success: true, data: devolucionesEnriquecidas, count };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, error: error.message };
+      console.error('❌ Error en fetchDevoluciones:', error);
+      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+      console.error('❌ Tipo de error:', typeof error);
+      console.error('❌ Keys del error:', Object.keys(error));
+      
+      // Manejo robusto del mensaje de error
+      let errorMessage = 'Error desconocido al cargar devoluciones';
+      
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        // Verificar si el message es JSON válido
+        try {
+          const parsed = JSON.parse(error.message);
+          errorMessage = parsed.msg || parsed.message || JSON.stringify(parsed);
+        } catch {
+          errorMessage = error.message;
+        }
+      } else if (error?.error_description) {
+        errorMessage = error.error_description;
+      } else if (error?.hint) {
+        errorMessage = error.hint;
+      } else if (error?.details) {
+        errorMessage = error.details;
+      }
+      
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -152,14 +199,15 @@ const useDevolucionesStore = create((set, get) => ({
       devoluciones: [], 
       currentPage: 0, 
       hasMore: true,
-      totalCount: 0 
+      totalCount: 0,
+      error: null // Limpia error al resetear
     });
   },
 
   // 🆕 Búsqueda en servidor
   searchDevoluciones: async (searchTerm, filtros = {}, reset = false) => {
     if (!searchTerm || searchTerm.trim() === '') {
-      set({ searchResults: [], searchHasMore: true, searchPage: 0 });
+      set({ searchResults: [], searchHasMore: true, searchPage: 0, error: null });
       return { success: true, data: [] };
     }
 
@@ -168,6 +216,12 @@ const useDevolucionesStore = create((set, get) => ({
       const state = get();
       const page = reset ? 0 : state.searchPage;
       const pageSize = 50;
+      
+      // 🔥 Si no hay más datos, no hacer la petición
+      if (!reset && !state.searchHasMore) {
+        set({ searchLoading: false });
+        return { success: true, data: [], count: 0 };
+      }
       
       const from = page * pageSize;
       const to = from + pageSize - 1;
@@ -210,7 +264,17 @@ const useDevolucionesStore = create((set, get) => ({
 
       const { data, error, count } = await query;
 
-      if (error) throw error;
+      if (error) {
+        // 🔥 Si es error 416 (rango fuera de límites), no hay más datos
+        if (error.code === 'PGRST103' || error.message?.includes('416')) {
+          set({ 
+            searchHasMore: false,
+            searchLoading: false 
+          });
+          return { success: true, data: [], count: 0 };
+        }
+        throw error;
+      }
 
       const fechaActual = new Date();
       const resultadosEnriquecidos = (data || []).map(dev => {
@@ -223,18 +287,38 @@ const useDevolucionesStore = create((set, get) => ({
         };
       });
 
+      // 🔥 Determinar si hay más datos
+      const newSearchHasMore = count > (page + 1) * pageSize;
+
       set({ 
         searchResults: reset ? resultadosEnriquecidos : [...state.searchResults, ...resultadosEnriquecidos],
         searchPage: page + 1,
-        searchHasMore: (page + 1) * pageSize < count,
+        searchHasMore: newSearchHasMore,
         searchLoading: false 
       });
 
       return { success: true, data: resultadosEnriquecidos, count };
     } catch (error) {
       console.error('❌ Error en búsqueda:', error);
-      set({ error: error.message, searchLoading: false });
-      return { success: false, error: error.message };
+      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+      
+      let errorMessage = 'Error desconocido en la búsqueda';
+      
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        try {
+          const parsed = JSON.parse(error.message);
+          errorMessage = parsed.msg || parsed.message || JSON.stringify(parsed);
+        } catch {
+          errorMessage = error.message;
+        }
+      } else if (error?.error_description) {
+        errorMessage = error.error_description;
+      }
+      
+      set({ error: errorMessage, searchLoading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -243,7 +327,8 @@ const useDevolucionesStore = create((set, get) => ({
     set({ 
       searchResults: [], 
       searchPage: 0, 
-      searchHasMore: true 
+      searchHasMore: true,
+      error: null // Limpia error al resetear búsqueda
     });
   },
 
@@ -392,8 +477,25 @@ const useDevolucionesStore = create((set, get) => ({
       };
     } catch (error) {
       console.error('❌ Error en createDevolucion:', error);
-      set({ error: error.message, loading: false });
-      return { success: false, error: error.message };
+      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+      
+      let errorMessage = 'Error desconocido al crear devolución';
+      
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        try {
+          const parsed = JSON.parse(error.message);
+          errorMessage = parsed.msg || parsed.message || JSON.stringify(parsed);
+        } catch {
+          errorMessage = error.message;
+        }
+      } else if (error?.error_description) {
+        errorMessage = error.error_description;
+      }
+      
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -463,8 +565,10 @@ const useDevolucionesStore = create((set, get) => ({
 
       return { success: true, data: devolucionConDiasTranscurridos };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, error: error.message };
+      console.error('❌ Error en updateDevolucion:', error);
+      const errorMessage = error?.message || 'Error desconocido al actualizar devolución';
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -532,8 +636,10 @@ const useDevolucionesStore = create((set, get) => ({
 
       return { success: true, data: devolucionConDiasTranscurridos };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, error: error.message };
+      console.error('❌ Error en updateEstado:', error);
+      const errorMessage = error?.message || 'Error desconocido al actualizar estado';
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -596,8 +702,9 @@ const useDevolucionesStore = create((set, get) => ({
       return { success: true, data: devolucionConDiasTranscurridos };
     } catch (error) {
       console.error('❌ Error en aprobarYRegistrarPNV:', error);
-      set({ error: error.message, loading: false });
-      return { success: false, error: error.message };
+      const errorMessage = error?.message || 'Error desconocido al aprobar y registrar en PNV';
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -619,11 +726,14 @@ const useDevolucionesStore = create((set, get) => ({
 
       return { success: true };
     } catch (error) {
-      set({ error: error.message, loading: false });
-      return { success: false, error: error.message };
+      console.error('❌ Error en deleteDevolucion:', error);
+      const errorMessage = error?.message || 'Error desconocido al eliminar devolución';
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
     }
   },
 
+  // ✅ Función mejorada para limpiar errores
   clearError: () => set({ error: null }),
 }));
 

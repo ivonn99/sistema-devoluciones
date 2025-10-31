@@ -1,12 +1,11 @@
 /* TablaDevoluciones.css - Optimizado para Infinite Scroll */
-
 /* ========== CONTENEDOR PRINCIPAL ========== */
 .tabla-container {
   background: white;
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  height: calc(100vh - 200px); /* Altura fija basada en viewport */
+  height: calc(100vh - 80px); /* Altura maximizada para ver más registros */
   display: flex;
   flex-direction: column;
   overflow: hidden;
