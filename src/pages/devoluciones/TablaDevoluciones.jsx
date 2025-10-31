@@ -60,7 +60,7 @@ const TablaDevoluciones = ({
   const isLoading = showSearchResults ? searchLoading : loading;
   const hasMoreData = showSearchResults ? searchHasMore : hasMore;
 
-  // 🆕 Infinite Scroll Observer
+  // 🆕 Infinite Scroll Observer (optimizado para móvil)
   const handleObserver = useCallback((entries) => {
     const [target] = entries;
     if (target.isIntersecting && hasMoreData && !isLoading) {
@@ -71,7 +71,11 @@ const TablaDevoluciones = ({
 
   useEffect(() => {
     const element = observerTarget.current;
-    const option = { threshold: 0.1 };
+    // 🔧 Opciones optimizadas para móvil
+    const option = { 
+      threshold: 0,
+      rootMargin: '200px' // Empieza a cargar 200px antes de llegar
+    };
     const observer = new IntersectionObserver(handleObserver, option);
     
     if (element) observer.observe(element);
@@ -80,6 +84,25 @@ const TablaDevoluciones = ({
       if (element) observer.unobserve(element);
     };
   }, [handleObserver]);
+
+  // 🆕 Cargar más al hacer scroll manual (fallback para móvil)
+  useEffect(() => {
+    const handleScroll = () => {
+      // Detectar si estamos cerca del final
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+      
+      // Si estamos a 300px del final
+      if (scrollHeight - scrollTop - clientHeight < 300 && hasMoreData && !isLoading) {
+        console.log("🔄 [Scroll] Cargando más registros...");
+        onLoadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMoreData, isLoading, onLoadMore]);
 
   const abrirDetalles = (devolucion) => {
     console.log("🔍 Abriendo detalles de devolución:", devolucion);
@@ -156,7 +179,8 @@ const TablaDevoluciones = ({
             </td>
             <td data-label="Acciones">
               <button className="btn-ver" onClick={() => abrirDetalles(dev)}>
-                <Eye size={16} color="currentColor" /> Ver
+                <Eye size={18} color="currentColor" /> 
+                <span>Ver detalles</span>
               </button>
             </td>
           </tr>
@@ -290,8 +314,8 @@ const ModalDetalles = ({ devolucion, onClose }) => {
   }, [devolucion.id]);
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <header className={`modal-header ${devolucion.estado_actual}`}>
           <h2>Detalles de Devolución</h2>
           <button className="btn-cerrar" onClick={onClose}>✕</button>
