@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
 import useDevolucionesStore from '../../stores/devolucionesStore';
@@ -40,6 +40,23 @@ const PendientesAlmacen = () => {
     cargarDevoluciones();
   }, []);
 
+  // Efecto para controlar el scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (modalAbierto) {
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup al desmontar
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = 'unset';
+    };
+  }, [modalAbierto]);
+
   const cargarDevoluciones = async () => {
     await fetchDevoluciones({ 
       estado_actual: 'requiere_correccion',
@@ -64,20 +81,27 @@ const PendientesAlmacen = () => {
     return true;
   });
 
-  const abrirModal = (devolucion) => {
+  const abrirModal = useCallback((devolucion) => {
+    console.log('🔍 Abriendo modal con devolución:', devolucion);
+    console.log('📦 Productos originales:', devolucion.devoluciones_detalle);
+    
     setDevolucionSeleccionada(devolucion);
+    
     const productosConId = (devolucion.devoluciones_detalle || []).map((prod, idx) => ({
-      id: `prod_${idx}`,
-      concepto_sustancia: prod.concepto_sustancia,
-      cantidad: prod.cantidad,
-      estado_producto: prod.estado_producto,
+      id: `prod_${Date.now()}_${idx}`,
+      concepto_sustancia: prod.concepto_sustancia || '',
+      cantidad: prod.cantidad || 1,
+      estado_producto: prod.estado_producto || 'buen_estado',
       comentarios: prod.comentarios || '',
       esNuevo: false
     }));
+    
+    console.log('✅ Productos mapeados:', productosConId);
+    
     setProductosEditables(productosConId);
     setObservacionesCorreccion('');
     setModalAbierto(true);
-  };
+  }, []);
 
   const cerrarModal = () => {
     setModalAbierto(false);
@@ -98,11 +122,21 @@ const PendientesAlmacen = () => {
     setProductosEditables([...productosEditables, nuevoProducto]);
   };
 
-  const editarProducto = (index, campo, valor) => {
-    const nuevosProductos = [...productosEditables];
-    nuevosProductos[index][campo] = valor;
-    setProductosEditables(nuevosProductos);
-  };
+  const editarProducto = useCallback((index, campo, valor) => {
+    console.log(`✏️ Editando producto ${index}, campo: ${campo}, valor:`, valor);
+    
+    setProductosEditables(prev => {
+      const nuevosProductos = [...prev];
+      if (nuevosProductos[index]) {
+        nuevosProductos[index] = {
+          ...nuevosProductos[index],
+          [campo]: valor
+        };
+      }
+      console.log('📝 Productos actualizados:', nuevosProductos);
+      return nuevosProductos;
+    });
+  }, []);
 
   const eliminarProducto = async (index) => {
     const result = await Swal.fire({
@@ -123,8 +157,10 @@ const PendientesAlmacen = () => {
     }
   };
 
-  const validarProductos = () => {
-    if (productosEditables.length === 0) {
+  const validarProductos = useCallback(() => {
+    console.log('🔍 Validando productos:', productosEditables);
+    
+    if (!productosEditables || productosEditables.length === 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Sin productos',
@@ -137,6 +173,17 @@ const PendientesAlmacen = () => {
     for (let i = 0; i < productosEditables.length; i++) {
       const prod = productosEditables[i];
       
+      if (!prod) {
+        console.error(`❌ Producto ${i} es null/undefined`);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en validación',
+          text: `Error al validar producto #${i + 1}`,
+          confirmButtonColor: '#ef4444'
+        });
+        return false;
+      }
+      
       if (!prod.concepto_sustancia || prod.concepto_sustancia.trim() === '') {
         Swal.fire({
           icon: 'warning',
@@ -147,7 +194,8 @@ const PendientesAlmacen = () => {
         return false;
       }
       
-      if (!prod.cantidad || prod.cantidad <= 0) {
+      const cantidad = Number(prod.cantidad);
+      if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
         Swal.fire({
           icon: 'warning',
           title: 'Cantidad inválida',
@@ -168,8 +216,9 @@ const PendientesAlmacen = () => {
       }
     }
     
+    console.log('✅ Validación exitosa');
     return true;
-  };
+  }, [productosEditables]);
 
   const confirmarCorreccion = async () => {
     if (!validarProductos()) return;
@@ -240,7 +289,7 @@ const PendientesAlmacen = () => {
 
       const esExcepcion = devolucionSeleccionada.tipo_excepcion !== null;
       const nuevoEstado = esExcepcion ? 'requiere_autorizacion' : 'registrada';
-      const nuevoProceso = esExcepcion ? 'representante' : 'credito'; // ✅ CAMBIO AQUÍ
+      const nuevoProceso = esExcepcion ? 'representante' : 'credito';
 
       const resultadoUpdate = await updateDevolucion(
         devolucionSeleccionada.id,
@@ -267,7 +316,6 @@ const PendientesAlmacen = () => {
         throw new Error(resultadoEstado.error || 'Error al cambiar estado');
       }
 
-      // ✅ También actualiza el mensaje de éxito
       const nombreAreaDestino = nuevoProceso === 'credito' ? 'Crédito y Cobranza' : 'Representante/Administración';
 
       await Swal.fire({
@@ -493,9 +541,21 @@ const ModalCorreccion = ({
   onConfirmar, 
   onCerrar 
 }) => {
+  // Cerrar modal al hacer clic en el overlay
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onCerrar();
+    }
+  };
+
+  // Prevenir que el clic dentro del modal cierre el overlay
+  const handleModalClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="modal-overlay" onClick={handleOverlayClick}>
+      <div className="modal-content" onClick={handleModalClick}>
         <div className="modal-header">
           <h2 className="modal-title">
             <Edit style={{ color: '#f59e0b' }} />
@@ -531,6 +591,7 @@ const ModalCorreccion = ({
                 <button
                   onClick={() => onEliminarProducto(index)}
                   className="btn-eliminar-producto"
+                  type="button"
                 >
                   <Trash2 size={14} />
                   Quitar
@@ -585,7 +646,11 @@ const ModalCorreccion = ({
               </div>
             ))}
 
-            <button onClick={onAgregarProducto} className="btn-agregar-producto">
+            <button 
+              onClick={onAgregarProducto} 
+              className="btn-agregar-producto"
+              type="button"
+            >
               <PlusCircle size={20} />
               Agregar Producto
             </button>
@@ -605,16 +670,24 @@ const ModalCorreccion = ({
               * Es importante documentar los cambios realizados para trazabilidad
             </p>
           </div>
+        </div>
 
-          <div className="modal-footer">
-            <button onClick={onCerrar} className="btn-cancelar">
-              Cancelar
-            </button>
-            <button onClick={onConfirmar} className="btn-confirmar">
-              <Edit size={20} />
-              Guardar y Reenviar
-            </button>
-          </div>
+        <div className="modal-footer">
+          <button 
+            onClick={onCerrar} 
+            className="btn-cancelar"
+            type="button"
+          >
+            Cancelar
+          </button>
+          <button 
+            onClick={onConfirmar} 
+            className="btn-confirmar"
+            type="button"
+          >
+            <Edit size={20} />
+            Guardar y Reenviar
+          </button>
         </div>
       </div>
     </div>

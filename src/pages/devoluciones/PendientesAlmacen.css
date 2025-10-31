@@ -1,4 +1,27 @@
-/* Contenedor principal */
+
+css.modal-overlay,
+.modal-overlay *,
+.modal-content,
+.modal-content * {
+  pointer-events: auto !important;
+}
+
+
+/* Animaciones */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+/* Contenedor Principal */
 .pendientes-almacen-container {
   min-height: 100vh;
   background-color: #f9fafb;
@@ -8,6 +31,11 @@
 .pendientes-almacen-wrapper {
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* Prevenir scroll cuando modal está abierto */
+body.modal-open {
+  overflow: hidden;
 }
 
 /* Header */
@@ -24,6 +52,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .header-title {
@@ -77,6 +107,17 @@
   border-radius: 6px;
   font-size: 0.875rem;
   cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-select:hover {
+  border-color: #f59e0b;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .btn-refresh {
@@ -103,7 +144,7 @@
   opacity: 0.6;
 }
 
-/* Alertas y mensajes */
+/* Alertas */
 .error-alert {
   background-color: #fee2e2;
   border: 1px solid #fecaca;
@@ -120,6 +161,7 @@
   margin: 0;
 }
 
+/* Loading */
 .loading-container {
   text-align: center;
   padding: 3rem;
@@ -130,6 +172,7 @@
   margin-top: 1rem;
 }
 
+/* Estado Vacío */
 .empty-state {
   background-color: white;
   border-radius: 8px;
@@ -147,20 +190,35 @@
 
 .empty-text {
   color: #6b7280;
+  margin: 0;
 }
 
-/* Card de devolución */
+/* Lista de Devoluciones */
+.devoluciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Card de Devolución */
 .devolucion-card {
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-left: 4px solid #f59e0b;
   overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.devolucion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Header del Card */
 .devolucion-header {
-  padding: 0.75rem 1.5rem;
-  background-color: #fef3c7;
+  background-color: #fffbeb;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #fde68a;
 }
 
@@ -169,29 +227,28 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  font-size: 0.875rem;
   color: #92400e;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
 }
 
 .motivo-correccion {
-  margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: #92400e;
-  background-color: #fffbeb;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin-left: 1.75rem;
+  color: #78350f;
+  margin: 0;
 }
 
+/* Contenido del Card */
 .devolucion-body {
   padding: 1.5rem;
 }
 
+/* Info Grid */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .info-label {
@@ -206,19 +263,25 @@
 .info-value {
   font-weight: bold;
   font-size: 1.125rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
 }
 
 .empresa-badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background-color: #f3f4f6;
+  background-color: #fef3c7;
+  color: #92400e;
   border-radius: 4px;
   font-size: 0.75rem;
-  margin-top: 0.25rem;
+  font-weight: 500;
 }
 
 .cliente-name {
   font-weight: 600;
+  font-size: 1rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
 }
 
 .vendedor-info {
@@ -231,15 +294,20 @@
 
 .fecha-info {
   font-size: 0.875rem;
+  color: #374151;
+}
+
+.fecha-info > div {
+  margin-bottom: 0.25rem;
 }
 
 .dias-diferencia {
   font-weight: 600;
-  margin-top: 0.25rem;
-  color: #6b7280;
+  margin-top: 0.5rem;
+  color: #f59e0b;
 }
 
-/* Productos */
+/* Productos Container */
 .productos-container {
   background-color: #f9fafb;
   border-radius: 6px;
@@ -252,6 +320,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
+  color: #111827;
   margin-bottom: 0.75rem;
 }
 
@@ -260,25 +329,28 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.producto-item:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb;
+.producto-item:last-child {
+  border-bottom: none;
 }
 
 .producto-name {
   font-weight: 500;
+  color: #111827;
 }
 
 .producto-estado {
   font-size: 0.875rem;
   color: #6b7280;
+  margin-top: 0.25rem;
 }
 
 .producto-cantidad {
-  text-align: right;
   font-weight: bold;
   color: #f59e0b;
+  font-size: 1.125rem;
 }
 
 /* Observaciones */
@@ -287,21 +359,24 @@
   border-left: 4px solid #3b82f6;
   padding: 0.75rem;
   margin-bottom: 1rem;
+  border-radius: 4px;
 }
 
 .observaciones-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: #1e3a8a;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .observaciones-text {
   font-size: 0.875rem;
   color: #1e40af;
+  white-space: pre-wrap;
+  margin: 0;
 }
 
-/* Botón de acción */
+/* Footer del Card */
 .devolucion-footer {
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
@@ -309,12 +384,12 @@
 
 .btn-corregir {
   width: 100%;
+  padding: 0.75rem 1rem;
   background-color: #f59e0b;
   color: white;
-  padding: 0.75rem 1rem;
+  border: none;
   border-radius: 6px;
   font-weight: 600;
-  border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -336,8 +411,11 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  z-index: 50;
+  z-index: 9999;
+  overflow-y: auto;
+  pointer-events: auto; /* AGREGAR ESTA LÍNEA */
 }
+
 
 .modal-content {
   background-color: white;
@@ -345,16 +423,16 @@
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  pointer-events: auto; /* AGREGAR ESTA LÍNEA */
 }
 
 .modal-header {
   padding: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
-  background-color: #fef3c7;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  background-color: #fffbeb;
 }
 
 .modal-title {
@@ -363,16 +441,20 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: #92400e;
   margin: 0;
 }
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
+/* Alerta de Corrección */
 .correccion-alert {
-  background-color: #fffbeb;
-  border: 2px solid #fde68a;
+  background-color: #fef3c7;
+  border: 1px solid #fde68a;
   border-radius: 6px;
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -386,25 +468,29 @@
 
 .correccion-alert-text {
   color: #78350f;
+  font-size: 0.875rem;
+  margin: 0;
 }
 
-/* Productos editables */
+/* Productos Editables */
 .productos-edit-header {
-  font-weight: 600;
-  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
   font-size: 1.125rem;
 }
 
 .productos-count-badge {
   margin-left: auto;
-  font-size: 0.75rem;
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #fef3c7;
+  color: #92400e;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .producto-edit-card {
@@ -412,7 +498,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   padding: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   position: relative;
 }
 
@@ -422,10 +508,10 @@
   right: 3rem;
   background-color: #d1fae5;
   color: #047857;
-  font-size: 0.75rem;
-  font-weight: 600;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .btn-eliminar-producto {
@@ -437,9 +523,9 @@
   border: none;
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -451,131 +537,166 @@
 }
 
 .producto-number {
-  font-size: 0.875rem;
   font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
+  color: #f59e0b;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
 }
 
-/* Form inputs */
 .form-group {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .form-label {
   display: block;
   font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
 }
 
 .form-input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .form-input-number {
-  width: 120px;
-  padding: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input-number:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .form-select {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.875rem;
   cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .form-textarea {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.875rem;
   resize: vertical;
-  min-height: 60px;
+  min-height: 80px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Botón agregar producto */
+.form-textarea:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
 .btn-agregar-producto {
   width: 100%;
-  padding: 0.75rem;
-  background-color: #eff6ff;
-  color: #1e40af;
-  border: 2px dashed #3b82f6;
+  padding: 0.75rem 1rem;
+  background-color: #10b981;
+  color: white;
+  border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 600;
-  font-size: 0.875rem;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .btn-agregar-producto:hover {
-  background-color: #dbeafe;
-  border-color: #2563eb;
+  background-color: #059669;
 }
 
-/* Observaciones de corrección */
+/* Observaciones de Corrección */
 .observaciones-correccion-container {
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #fde68a;
 }
 
 .observaciones-correccion-label {
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
+  color: #92400e;
   margin-bottom: 0.5rem;
-  color: #374151;
 }
 
 .observaciones-correccion-textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #fca5a5;
+  border: 2px solid #fde68a;
   border-radius: 6px;
   font-size: 0.875rem;
   resize: vertical;
   min-height: 100px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.observaciones-correccion-textarea:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .observaciones-help-text {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: #6b7280;
   margin-top: 0.5rem;
   margin-bottom: 0;
+  font-style: italic;
 }
 
-/* Footer del modal */
+/* Modal Footer */
 .modal-footer {
   display: flex;
   gap: 0.75rem;
-  position: sticky;
-  bottom: 0;
-  background-color: white;
-  padding-top: 1rem;
+  padding: 1.5rem;
   border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
 }
 
 .btn-cancelar {
   flex: 1;
+  padding: 0.75rem 1rem;
   background-color: #e5e7eb;
   color: #374151;
-  padding: 0.75rem 1rem;
+  border: none;
   border-radius: 6px;
   font-weight: 600;
-  border: none;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -586,41 +707,59 @@
 
 .btn-confirmar {
   flex: 1;
-  background-color: #10b981;
-  color: white;
   padding: 0.75rem 1rem;
+  background-color: #f59e0b;
+  color: white;
+  border: none;
   border-radius: 6px;
   font-weight: 600;
-  border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  transition: background-color 0.2s;
 }
 
 .btn-confirmar:hover {
-  background-color: #059669;
+  background-color: #d97706;
 }
 
-/* Animación spin */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+/* Responsive */
+@media (max-width: 768px) {
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  to {
-    transform: rotate(360deg);
+
+  .header-counter {
+    text-align: left;
   }
-}
 
-.spin-animation {
-  animation: spin 1s linear infinite;
-}
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 
-/* Lista de devoluciones */
-.devoluciones-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-select,
+  .btn-refresh {
+    width: 100%;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
 }
