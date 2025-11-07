@@ -22,13 +22,14 @@ import './PendientesCredito.css';
 const PendientesCredito = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { 
-    devoluciones, 
-    loading, 
+  const {
+    devoluciones,
+    loading,
     error,
     fetchDevoluciones,
+    resetDevoluciones,
     aprobarYRegistrarPNV,
-    updateEstado 
+    updateEstado
   } = useDevolucionesStore();
 
   const [devolucionSeleccionada, setDevolucionSeleccionada] = useState(null);
@@ -40,7 +41,9 @@ const PendientesCredito = () => {
   const [filtroExcepcion, setFiltroExcepcion] = useState('todas');
 
   useEffect(() => {
+    resetDevoluciones(); // Limpiar estado previo del store
     cargarDevoluciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cargarDevoluciones = async () => {

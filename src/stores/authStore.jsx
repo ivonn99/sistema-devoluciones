@@ -10,12 +10,12 @@ const useAuthStore = create(
       user: null,
       error: null,
 
-      // Iniciar sesión con username
+      // Iniciar sesión con username (sistema híbrido)
       signIn: async (username, password) => {
         try {
           set({ loading: true, error: null });
-         
-          // Consultar el usuario en nuestra tabla personalizada con su rol
+
+          // Consultar el usuario en nuestra tabla personalizada
           const { data: usuario, error: errorConsulta } = await supabase
             .from('usuarios')
             .select(`
@@ -33,20 +33,49 @@ const useAuthStore = create(
             throw new Error('Usuario no encontrado');
           }
 
-          // Verificar la contraseña
-          // NOTA: En producción deberías usar bcrypt o similar
-          if (usuario.password !== password) {
-            throw new Error('Contraseña incorrecta');
+          let authData = null;
+          let userWithRole = null;
+
+          // SISTEMA HÍBRIDO: Intentar primero con Supabase Auth
+          if (usuario.email) {
+            const { data: authResponse, error: authError } = await supabase.auth.signInWithPassword({
+              email: usuario.email,
+              password: password
+            });
+
+            // Si Auth funciona, usar ese método (más seguro)
+            if (!authError && authResponse) {
+              authData = authResponse;
+              userWithRole = {
+                ...usuario,
+                rol: usuario.roles?.name || null,
+                auth_id: authData.user.id,
+                usando_auth: true
+              };
+            }
           }
 
-          // Crear objeto de usuario con rol
-          const userWithRole = {
-            ...usuario,
-            rol: usuario.roles?.name || null
-          };
+          // Si Auth falló o no tiene email, usar comparación directa (legacy)
+          if (!authData) {
+            if (usuario.password !== password) {
+              throw new Error('Contraseña incorrecta');
+            }
+
+            // Usuario autenticado con método legacy
+            userWithRole = {
+              ...usuario,
+              rol: usuario.roles?.name || null,
+              usando_auth: false
+            };
+
+            // Crear sesión mock para compatibilidad
+            authData = {
+              session: { user: userWithRole }
+            };
+          }
 
           set({
-            session: { user: userWithRole },
+            session: authData.session,
             user: userWithRole,
             loading: false,
             error: null
@@ -66,6 +95,11 @@ const useAuthStore = create(
 
       // Cerrar sesión
       signOut: async () => {
+        const state = get();
+        // Solo llamar a auth.signOut si el usuario usó Auth
+        if (state.user?.usando_auth) {
+          await supabase.auth.signOut();
+        }
         set({
           session: null,
           user: null,

@@ -1,5 +1,5 @@
 // pages/Dashboard.jsx
-import { Package, FileText, CreditCard, Warehouse, Users, LogOut, Search, X, Filter, RefreshCw } from 'lucide-react';
+import { Package, FileText, CreditCard, Warehouse, Users, LogOut, Search, X, Filter, RefreshCw, UsersRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import useAuthStore from '../stores/authStore';
@@ -41,18 +41,18 @@ const Dashboard = () => {
 
   // 🆕 Carga inicial con filtros
   useEffect(() => {
-    console.log("🟢 Cargando lista de devoluciones desde Dashboard...");
     resetDevoluciones();
     fetchDevoluciones(filters, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 🆕 Recargar cuando cambien los filtros
   useEffect(() => {
-    console.log("🔄 Filtros cambiados, recargando...");
     resetDevoluciones();
     resetSearch();
     setSearchTerm("");
     fetchDevoluciones(filters, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // 🆕 Búsqueda en servidor con debounce
@@ -67,7 +67,6 @@ const Dashboard = () => {
     }
 
     const timer = setTimeout(() => {
-      console.log("🔍 Buscando en servidor:", searchTerm);
       resetSearch();
       searchDevoluciones(searchTerm, filters, true);
     }, 500); // Espera 500ms después de que el usuario deje de escribir
@@ -77,15 +76,14 @@ const Dashboard = () => {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [searchTerm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, filters]);
 
   // 🆕 Función para cargar más (infinite scroll)
   const handleLoadMore = useCallback(() => {
     if (searchTerm.trim() !== "") {
-      console.log("🔍 Cargando más resultados de búsqueda...");
       searchDevoluciones(searchTerm, filters, false);
     } else {
-      console.log("📄 Cargando más devoluciones...");
       fetchDevoluciones(filters, false);
     }
   }, [searchTerm, filters, fetchDevoluciones, searchDevoluciones]);
@@ -136,6 +134,12 @@ const Dashboard = () => {
         icon: Warehouse,
         title: 'Pendientes Almacén',
         description: 'Revisar devoluciones en almacén'
+      },
+      {
+        path: '/clientes',
+        icon: UsersRound,
+        title: 'Clientes',
+        description: 'Buscar y administrar clientes'
       }
     ],
     credito_cobranza: [
@@ -150,6 +154,12 @@ const Dashboard = () => {
         icon: CreditCard,
         title: 'Pendientes Crédito',
         description: 'Revisar devoluciones en crédito'
+      },
+      {
+        path: '/clientes',
+        icon: UsersRound,
+        title: 'Clientes',
+        description: 'Buscar y administrar clientes'
       }
     ],
     administrador: [
@@ -182,17 +192,26 @@ const Dashboard = () => {
         icon: FileText,
         title: 'Reportes',
         description: 'Ver estadísticas y reportes'
+      },
+      {
+        path: '/clientes',
+        icon: UsersRound,
+        title: 'Clientes',
+        description: 'Buscar y administrar clientes'
       }
     ]
   };
 
   // Métricas calculadas (sobre datos cargados actualmente)
   const dataParaMetricas = searchTerm.trim() !== "" ? searchResults : devoluciones;
-  
+
   const metricas = {
     total: dataParaMetricas.length,
     concluidos: dataParaMetricas.filter(d => d.estado_actual === 'registrada_pnv').length,
-    pendientesAlmacen: dataParaMetricas.filter(d => d.proceso_en === 'almacen' && d.estado_actual !== 'registrada_pnv').length,
+    // Pendientes Almacén: solo correcciones solicitadas por Crédito/Representante
+    pendientesAlmacen: dataParaMetricas.filter(d =>
+      d.estado_actual === 'requiere_correccion' && d.proceso_en === 'almacen'
+    ).length,
     pendientesCredito: dataParaMetricas.filter(d => d.proceso_en === 'credito' && d.estado_actual !== 'registrada_pnv').length,
     pendientesRepresentante: dataParaMetricas.filter(d => d.proceso_en === 'representante' && d.estado_actual !== 'registrada_pnv').length,
   };

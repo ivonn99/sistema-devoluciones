@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00FF7F 0%, #005A2B 100%);
   padding: 2rem;
   position: relative;
   overflow: hidden;
@@ -31,7 +31,7 @@
 
 /* ========== FORMULARIO ========== */
 .login-form {
-  background: white;
+  background: #1a1a1a;
   border-radius: 20px;
   padding: 3rem;
   width: 100%;
@@ -57,7 +57,7 @@
 .login-form h1 {
   font-size: 2rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #ffffff;
   margin-bottom: 0.5rem;
   text-align: center;
 }
@@ -67,7 +67,7 @@
   display: block;
   width: 60px;
   height: 4px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00FF7F 0%, #007F3E 100%);
   margin: 1rem auto;
   border-radius: 2px;
 }
@@ -106,7 +106,7 @@
 .form-group label {
   display: block;
   font-weight: 600;
-  color: #334155;
+  color: #e5e7eb;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -117,20 +117,20 @@
 .form-group input {
   width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #374151;
   border-radius: 12px;
   font-size: 1rem;
-  color: #1e293b;
+  color: #ffffff;
   transition: all 0.3s ease;
-  background: #f8fafc;
+  background: #2d2d2d;
   box-sizing: border-box;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  border-color: #00FF7F;
+  background: #3a3a3a;
+  box-shadow: 0 0 0 4px rgba(0, 255, 127, 0.1);
   transform: translateY(-2px);
 }
 
@@ -142,14 +142,14 @@
 }
 
 .form-group input::placeholder {
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 /* ========== BOTÓN DE SUBMIT ========== */
 .login-form button[type="submit"] {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00FF7F 0%, #007F3E 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -160,17 +160,17 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 1rem;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 255, 127, 0.4);
 }
 
 .login-form button[type="submit"]:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 255, 127, 0.5);
 }
 
 .login-form button[type="submit"]:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 255, 127, 0.3);
 }
 
 .login-form button[type="submit"]:disabled {
@@ -201,20 +201,20 @@
 /* ========== TEXTO ADICIONAL ========== */
 .login-form p {
   text-align: center;
-  color: #64748b;
+  color: #9ca3af;
   font-size: 0.875rem;
   margin-top: 1.5rem;
 }
 
 .login-form p a {
-  color: #667eea;
+  color: #00FF7F;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
 }
 
 .login-form p a:hover {
-  color: #764ba2;
+  color: #007F3E;
   text-decoration: underline;
 }
 
@@ -222,13 +222,13 @@
 .login-footer {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #374151;
   text-align: center;
 }
 
 .login-footer p {
   margin: 0;
-  color: #64748b;
+  color: #9ca3af;
   font-size: 0.75rem;
 }
 
@@ -300,7 +300,7 @@
 
 /* ========== FOCUS VISIBLE ========== */
 .form-group input:focus-visible {
-  outline: 2px solid #667eea;
+  outline: 2px solid #00FF7F;
   outline-offset: 2px;
 }
 
@@ -308,16 +308,20 @@
 .form-group input:-webkit-autofill,
 .form-group input:-webkit-autofill:hover,
 .form-group input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset;
-  -webkit-text-fill-color: #1e293b;
+  -webkit-box-shadow: 0 0 0px 1000px #2d2d2d inset;
+  -webkit-text-fill-color: #ffffff;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 /* ========== LOGO O ICONO OPCIONAL ========== */
 .login-form::before {
-  content: '🔐';
+  content: '';
   display: block;
-  font-size: 3rem;
-  text-align: center;
-  margin-bottom: 1rem;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 1.5rem;
+  background-image: url('https://i.imgur.com/waCO9vZ.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }

@@ -21,13 +21,14 @@ import './PendientesAlmacen.css';
 const PendientesAlmacen = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { 
-    devoluciones, 
-    loading, 
+  const {
+    devoluciones,
+    loading,
     error,
     fetchDevoluciones,
+    resetDevoluciones,
     updateDevolucion,
-    updateEstado 
+    updateEstado
   } = useDevolucionesStore();
 
   const [devolucionSeleccionada, setDevolucionSeleccionada] = useState(null);
@@ -35,9 +36,13 @@ const PendientesAlmacen = () => {
   const [productosEditables, setProductosEditables] = useState([]);
   const [observacionesCorreccion, setObservacionesCorreccion] = useState('');
   const [filtroEmpresa, setFiltroEmpresa] = useState('todas');
+  const [clienteEditable, setClienteEditable] = useState('');
+  const [numeroNotaEditable, setNumeroNotaEditable] = useState('');
 
   useEffect(() => {
+    resetDevoluciones(); // Limpiar estado previo del store
     cargarDevoluciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Efecto para controlar el scroll del body cuando el modal está abierto
@@ -58,9 +63,9 @@ const PendientesAlmacen = () => {
   }, [modalAbierto]);
 
   const cargarDevoluciones = async () => {
-    await fetchDevoluciones({ 
+    await fetchDevoluciones({
       estado_actual: 'requiere_correccion',
-      proceso_en: 'almacen' 
+      proceso_en: 'almacen'
     });
   };
 
@@ -82,11 +87,8 @@ const PendientesAlmacen = () => {
   });
 
   const abrirModal = useCallback((devolucion) => {
-    console.log('🔍 Abriendo modal con devolución:', devolucion);
-    console.log('📦 Productos originales:', devolucion.devoluciones_detalle);
-    
     setDevolucionSeleccionada(devolucion);
-    
+
     const productosConId = (devolucion.devoluciones_detalle || []).map((prod, idx) => ({
       id: `prod_${Date.now()}_${idx}`,
       concepto_sustancia: prod.concepto_sustancia || '',
@@ -95,10 +97,10 @@ const PendientesAlmacen = () => {
       comentarios: prod.comentarios || '',
       esNuevo: false
     }));
-    
-    console.log('✅ Productos mapeados:', productosConId);
-    
+
     setProductosEditables(productosConId);
+    setClienteEditable(devolucion.cliente || '');
+    setNumeroNotaEditable(devolucion.numero_nota || '');
     setObservacionesCorreccion('');
     setModalAbierto(true);
   }, []);
@@ -107,6 +109,8 @@ const PendientesAlmacen = () => {
     setModalAbierto(false);
     setDevolucionSeleccionada(null);
     setProductosEditables([]);
+    setClienteEditable('');
+    setNumeroNotaEditable('');
     setObservacionesCorreccion('');
   };
 
@@ -123,8 +127,6 @@ const PendientesAlmacen = () => {
   };
 
   const editarProducto = useCallback((index, campo, valor) => {
-    console.log(`✏️ Editando producto ${index}, campo: ${campo}, valor:`, valor);
-    
     setProductosEditables(prev => {
       const nuevosProductos = [...prev];
       if (nuevosProductos[index]) {
@@ -133,7 +135,6 @@ const PendientesAlmacen = () => {
           [campo]: valor
         };
       }
-      console.log('📝 Productos actualizados:', nuevosProductos);
       return nuevosProductos;
     });
   }, []);
@@ -158,8 +159,6 @@ const PendientesAlmacen = () => {
   };
 
   const validarProductos = useCallback(() => {
-    console.log('🔍 Validando productos:', productosEditables);
-    
     if (!productosEditables || productosEditables.length === 0) {
       Swal.fire({
         icon: 'warning',
@@ -215,13 +214,34 @@ const PendientesAlmacen = () => {
         return false;
       }
     }
-    
-    console.log('✅ Validación exitosa');
+
     return true;
   }, [productosEditables]);
 
   const confirmarCorreccion = async () => {
     if (!validarProductos()) return;
+
+    // Validar cliente
+    if (!clienteEditable.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: '⚠️ Cliente requerido',
+        text: 'El nombre del cliente no puede estar vacío',
+        confirmButtonColor: '#f59e0b'
+      });
+      return;
+    }
+
+    // Validar número de nota
+    if (!numeroNotaEditable.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: '⚠️ Número de nota requerido',
+        text: 'El número de nota no puede estar vacío',
+        confirmButtonColor: '#f59e0b'
+      });
+      return;
+    }
 
     if (!observacionesCorreccion.trim()) {
       Swal.fire({
@@ -239,7 +259,8 @@ const PendientesAlmacen = () => {
         <div style="text-align: left; padding: 10px;">
           <p style="margin-bottom: 15px;">Se guardarán los cambios y la devolución regresará al área que la solicitó</p>
           <ul style="list-style: none; padding-left: 0;">
-            <li>📝 <strong>Nota:</strong> ${devolucionSeleccionada.numero_nota}</li>
+            <li>👤 <strong>Cliente:</strong> ${clienteEditable}</li>
+            <li>📝 <strong>Nota:</strong> ${numeroNotaEditable}</li>
             <li>📦 <strong>Productos:</strong> ${productosEditables.length}</li>
             <li>🔄 <strong>Corrección:</strong> ${observacionesCorreccion.substring(0, 50)}...</li>
           </ul>
@@ -294,6 +315,8 @@ const PendientesAlmacen = () => {
       const resultadoUpdate = await updateDevolucion(
         devolucionSeleccionada.id,
         {
+          cliente: clienteEditable.trim(),
+          numero_nota: numeroNotaEditable.trim(),
           observaciones_almacen: nuevasObservaciones,
           motivo_devolucion_general: devolucionSeleccionada.motivo_devolucion_general,
           productos: productosParaGuardar
@@ -327,7 +350,8 @@ const PendientesAlmacen = () => {
               La corrección se ha guardado y reenviado a <strong>${nombreAreaDestino}</strong>
             </p>
             <p style="color: #6b7280; font-size: 0.9em;">
-              Nota: ${devolucionSeleccionada.numero_nota}
+              Cliente: ${clienteEditable}<br/>
+              Nota: ${numeroNotaEditable}
             </p>
           </div>
         `,
@@ -427,6 +451,10 @@ const PendientesAlmacen = () => {
           <ModalCorreccion
             devolucion={devolucionSeleccionada}
             productosEditables={productosEditables}
+            clienteEditable={clienteEditable}
+            setClienteEditable={setClienteEditable}
+            numeroNotaEditable={numeroNotaEditable}
+            setNumeroNotaEditable={setNumeroNotaEditable}
             onAgregarProducto={agregarProducto}
             onEditarProducto={editarProducto}
             onEliminarProducto={eliminarProducto}
@@ -530,16 +558,20 @@ const DevolucionCard = ({ devolucion, onCorregir }) => {
   );
 };
 
-const ModalCorreccion = ({ 
-  devolucion, 
+const ModalCorreccion = ({
+  devolucion,
   productosEditables,
+  clienteEditable,
+  setClienteEditable,
+  numeroNotaEditable,
+  setNumeroNotaEditable,
   onAgregarProducto,
   onEditarProducto,
   onEliminarProducto,
   observacionesCorreccion,
   setObservacionesCorreccion,
-  onConfirmar, 
-  onCerrar 
+  onConfirmar,
+  onCerrar
 }) => {
   // Cerrar modal al hacer clic en el overlay
   const handleOverlayClick = (e) => {
@@ -570,6 +602,37 @@ const ModalCorreccion = ({
             </div>
             <div className="correccion-alert-text">
               {devolucion.motivo_correccion || 'No especificado'}
+            </div>
+          </div>
+
+          {/* Campos editables: Cliente y Número de Nota */}
+          <div style={{ marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">
+                <User size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                Cliente *
+              </label>
+              <input
+                type="text"
+                value={clienteEditable}
+                onChange={(e) => setClienteEditable(e.target.value)}
+                placeholder="Nombre del cliente"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <FileText size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                Número de Nota *
+              </label>
+              <input
+                type="text"
+                value={numeroNotaEditable}
+                onChange={(e) => setNumeroNotaEditable(e.target.value)}
+                placeholder="Ej: 12345"
+                className="form-input"
+              />
             </div>
           </div>
 

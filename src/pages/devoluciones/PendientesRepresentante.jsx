@@ -26,13 +26,14 @@ import './PendientesRepresentante.css';
 const PendientesRepresentante = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { 
-    devoluciones, 
-    loading, 
+  const {
+    devoluciones,
+    loading,
     error,
     fetchDevoluciones,
+    resetDevoluciones,
     updateDevolucion,
-    updateEstado 
+    updateEstado
   } = useDevolucionesStore();
 
   const [devolucionSeleccionada, setDevolucionSeleccionada] = useState(null);
@@ -46,7 +47,9 @@ const PendientesRepresentante = () => {
   const [filtroExcepcion, setFiltroExcepcion] = useState('todas');
 
   useEffect(() => {
+    resetDevoluciones(); // Limpiar estado previo del store
     cargarDevoluciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cargarDevoluciones = async () => {

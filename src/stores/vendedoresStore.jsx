@@ -8,10 +8,8 @@ const useVendedoresStore = create((set) => ({
 
   // Obtener todos los vendedores
   fetchVendedores: async () => {
-    console.log('🔄 [vendedoresStore] Iniciando fetchVendedores...');
     set({ loading: true, error: null });
     try {
-      console.log('📡 [vendedoresStore] Consultando Supabase...');
       const { data, error } = await supabase
         .from('vendedores')
         .select('*')
@@ -22,7 +20,6 @@ const useVendedoresStore = create((set) => ({
         throw error;
       }
 
-      console.log('✅ [vendedoresStore] Vendedores obtenidos:', data);
       set({ vendedores: data || [], loading: false });
       return { success: true, data };
     } catch (error) {

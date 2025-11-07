@@ -13,6 +13,10 @@ import PendientesAlmacen from './pages/devoluciones/PendientesAlmacen';
 import PendientesCredito from './pages/devoluciones/PendientesCredito';
 import PendientesRepresentante from './pages/devoluciones/PendientesRepresentante';
 import Reportes from './pages/reportes/reportes';
+import Clientes from './pages/clientes/Clientes';
+import Usuarios from './pages/usuarios/Usuarios';
+import EliminarNotas from './pages/eliminar-notas/EliminarNotas';
+import ClientesPlantilla from './pages/clientes-plantilla/ClientesPlantilla';
 
 // Componente para rutas protegidas con verificación de rol
 const ProtectedRoute = ({ children, allowedRoles = null }) => {
@@ -58,9 +62,9 @@ function App() {
         />
 
         {/* ========== DASHBOARD (PÚBLICO) ========== */}
-        <Route 
-          path="/dashboard" 
-          element={<Dashboard />} 
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
         />
 
         {/* ========== RUTAS PROTEGIDAS (CON DASHBOARDLAYOUT) ========== */}
@@ -118,28 +122,42 @@ function App() {
             }
           />
 
+          {/* Clientes - Almacén, Crédito y Admin */}
+          <Route
+            path="/clientes"
+            element={
+              <ProtectedRoute allowedRoles={['jefe_almacen', 'credito_cobranza', 'administrador']}>
+                <Clientes />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Usuarios - Solo Admin */}
           <Route
             path="/usuarios"
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
-                <div className="container py-xl">
-                  <h1>Gestión de Usuarios</h1>
-                  <p>Módulo de usuarios en desarrollo</p>
-                </div>
+                <Usuarios />
               </ProtectedRoute>
             }
           />
 
-          {/* Configuración - Solo Admin */}
+          {/* Eliminar notas - Solo Admin */}
           <Route
-            path="/configuracion"
+            path="/eliminar-notas"
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
-                <div className="container py-xl">
-                  <h1>Configuración</h1>
-                  <p>Módulo de configuración en desarrollo</p>
-                </div>
+                <EliminarNotas />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Clientes Plantilla - Admin y Crédito */}
+          <Route
+            path="/clientes-plantilla"
+            element={
+              <ProtectedRoute allowedRoles={['administrador', 'credito_cobranza']}>
+                <ClientesPlantilla />
               </ProtectedRoute>
             }
           />

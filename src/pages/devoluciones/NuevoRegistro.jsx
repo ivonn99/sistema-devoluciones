@@ -66,8 +66,6 @@ const NuevoRegistro = () => {
 
   // Debounce para búsqueda de clientes
   useEffect(() => {
-    if (formData.cliente) return;
-    
     const timer = setTimeout(async () => {
       if (searchCliente !== null) {
         setIsSearching(true);
@@ -77,7 +75,7 @@ const NuevoRegistro = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchCliente, formData.cliente]);
+  }, [searchCliente]);
 
   // Filtrar vendedores en el navegador
   const vendedoresFiltrados = vendedores.filter(vendedor =>

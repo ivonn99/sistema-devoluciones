@@ -1,17 +1,18 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ClipboardList, 
-  Clock, 
-  UserCheck, 
-  FileText, 
-  Settings, 
-  Users, 
+import {
+  LayoutDashboard,
+  Package,
+  ClipboardList,
+  Clock,
+  UserCheck,
+  Users,
   BarChart3,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  UsersRound,
+  Trash2,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useState } from 'react';
 import useAuthStore from "../../stores/authStore";
@@ -39,6 +40,11 @@ const menuConfig = {
       path: '/devoluciones/pendientes-almacen',
       label: 'Pendientes Almacén',
       icon: ClipboardList,
+    },
+    {
+      path: '/clientes',
+      label: 'Clientes',
+      icon: UsersRound,
     }
   ],
   
@@ -53,6 +59,16 @@ const menuConfig = {
       path: '/devoluciones/pendientes-credito',
       label: 'Pendientes Crédito',
       icon: Clock,
+    },
+    {
+      path: '/clientes',
+      label: 'Clientes',
+      icon: UsersRound,
+    },
+    {
+      path: '/clientes-plantilla',
+      label: 'Clientes Plantilla',
+      icon: FileSpreadsheet,
     }
   ],
   
@@ -84,14 +100,24 @@ const menuConfig = {
       icon: BarChart3,
     },
     {
+      path: '/clientes',
+      label: 'Clientes',
+      icon: UsersRound,
+    },
+    {
+      path: '/clientes-plantilla',
+      label: 'Clientes Plantilla',
+      icon: FileSpreadsheet,
+    },
+    {
       path: '/usuarios',
       label: 'Usuarios',
       icon: Users,
     },
     {
-      path: '/configuracion',
-      label: 'Configuración',
-      icon: Settings,
+      path: '/eliminar-notas',
+      label: 'Eliminar notas',
+      icon: Trash2,
     }
   ]
 };

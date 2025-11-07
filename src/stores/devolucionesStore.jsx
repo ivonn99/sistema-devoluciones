@@ -2,6 +2,57 @@
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
 
+// 🔧 Helper para parsear errores de Supabase de forma robusta
+const parseSupabaseError = (error) => {
+  // Si es un string, retornarlo directamente
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  // Si no es un objeto, convertir a string
+  if (typeof error !== 'object' || error === null) {
+    return 'Error desconocido al cargar devoluciones';
+  }
+
+  // Intentar extraer mensaje en orden de prioridad
+  // 1. message (puede ser JSON o string)
+  if (error.message) {
+    if (typeof error.message === 'string') {
+      // Solo intentar parsear si parece JSON válido
+      if (error.message.trim().startsWith('{') && error.message.trim().endsWith('}')) {
+        try {
+          const parsed = JSON.parse(error.message);
+          return parsed.msg || parsed.message || JSON.stringify(parsed);
+        } catch {
+          // JSON inválido, retornar como string
+          return error.message;
+        }
+      }
+      // No es JSON, retornar como string directamente
+      return error.message;
+    }
+    return String(error.message);
+  }
+
+  // 2. error_description
+  if (error.error_description) {
+    return String(error.error_description);
+  }
+
+  // 3. details
+  if (error.details) {
+    return String(error.details);
+  }
+
+  // 4. hint
+  if (error.hint) {
+    return String(error.hint);
+  }
+
+  // 5. Fallback
+  return 'Error desconocido al procesar la solicitud';
+};
+
 // 🕐 Helper para convertir timestamp a hora CDMX para GUARDAR en BD
 const obtenerFechaCDMXParaBD = () => {
   const fecha = new Date();
@@ -82,13 +133,13 @@ const useDevolucionesStore = create((set, get) => ({
       const state = get();
       const page = reset ? 0 : state.currentPage;
       const pageSize = state.pageSize;
-      
+
       // 🔥 Si no hay más datos, no hacer la petición
       if (!reset && !state.hasMore) {
         set({ loading: false });
         return { success: true, data: [], count: state.totalCount };
       }
-      
+
       const from = page * pageSize;
       const to = from + pageSize - 1;
 
@@ -114,7 +165,7 @@ const useDevolucionesStore = create((set, get) => ({
       if (filtros.tipo_cliente) {
         query = query.eq('tipo_cliente', filtros.tipo_cliente);
       }
-      if (filtros.dentro_plazo !== '') {
+      if (filtros.dentro_plazo !== undefined && filtros.dentro_plazo !== '') {
         query = query.eq('dentro_plazo', filtros.dentro_plazo === 'si');
       }
       if (filtros.fecha_desde) {
@@ -128,10 +179,17 @@ const useDevolucionesStore = create((set, get) => ({
 
       if (error) {
         // 🔥 Si es error 416 (rango fuera de límites), no hay más datos
-        if (error.code === 'PGRST103' || error.message?.includes('416')) {
-          set({ 
+        // Verificación más robusta de error de rango
+        const isRangeError =
+          error.code === 'PGRST103' ||
+          error.code === 'PGRST116' ||
+          (error.message && typeof error.message === 'string' && error.message.includes('416')) ||
+          (error.details && typeof error.details === 'string' && error.details.includes('out of range'));
+
+        if (isRangeError) {
+          set({
             hasMore: false,
-            loading: false 
+            loading: false
           });
           return { success: true, data: [], count: state.totalCount };
         }
@@ -163,31 +221,9 @@ const useDevolucionesStore = create((set, get) => ({
       return { success: true, data: devolucionesEnriquecidas, count };
     } catch (error) {
       console.error('❌ Error en fetchDevoluciones:', error);
-      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
-      console.error('❌ Tipo de error:', typeof error);
-      console.error('❌ Keys del error:', Object.keys(error));
-      
-      // Manejo robusto del mensaje de error
-      let errorMessage = 'Error desconocido al cargar devoluciones';
-      
-      if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error?.message) {
-        // Verificar si el message es JSON válido
-        try {
-          const parsed = JSON.parse(error.message);
-          errorMessage = parsed.msg || parsed.message || JSON.stringify(parsed);
-        } catch {
-          errorMessage = error.message;
-        }
-      } else if (error?.error_description) {
-        errorMessage = error.error_description;
-      } else if (error?.hint) {
-        errorMessage = error.hint;
-      } else if (error?.details) {
-        errorMessage = error.details;
-      }
-      
+
+      const errorMessage = parseSupabaseError(error);
+
       set({ error: errorMessage, loading: false });
       return { success: false, error: errorMessage };
     }
@@ -300,23 +336,9 @@ const useDevolucionesStore = create((set, get) => ({
       return { success: true, data: resultadosEnriquecidos, count };
     } catch (error) {
       console.error('❌ Error en búsqueda:', error);
-      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
-      
-      let errorMessage = 'Error desconocido en la búsqueda';
-      
-      if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error?.message) {
-        try {
-          const parsed = JSON.parse(error.message);
-          errorMessage = parsed.msg || parsed.message || JSON.stringify(parsed);
-        } catch {
-          errorMessage = error.message;
-        }
-      } else if (error?.error_description) {
-        errorMessage = error.error_description;
-      }
-      
+
+      const errorMessage = parseSupabaseError(error);
+
       set({ error: errorMessage, searchLoading: false });
       return { success: false, error: errorMessage };
     }
@@ -718,9 +740,11 @@ const useDevolucionesStore = create((set, get) => ({
 
       if (error) throw error;
 
+      // Eliminar de ambas listas (principal y resultados de búsqueda)
       set((state) => ({
         devoluciones: state.devoluciones.filter((dev) => dev.id !== id),
-        totalCount: state.totalCount - 1,
+        searchResults: state.searchResults.filter((dev) => dev.id !== id),
+        totalCount: state.totalCount > 0 ? state.totalCount - 1 : 0,
         loading: false,
       }));
 

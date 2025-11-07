@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart3, TrendingUp, Clock, AlertTriangle, Download, Calendar, Filter } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, AlertTriangle, Download, Calendar, Filter, User, Package } from 'lucide-react';
 import useDevolucionesStore from '../../stores/devolucionesStore';
-import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './reportes.css';
 
 const Reportes = () => {
@@ -23,7 +23,7 @@ const Reportes = () => {
 
   // Obtener lista única de vendedores
   const vendedoresUnicos = useMemo(() => {
-    const vendedores = [...new Set(devoluciones.map(d => d.vendedor).filter(Boolean))];
+    const vendedores = [...new Set(devoluciones.map(d => d.vendedor_nombre).filter(Boolean))];
     return vendedores.sort();
   }, [devoluciones]);
 
@@ -74,8 +74,8 @@ const Reportes = () => {
       const fechaDev = new Date(dev.fecha_devolucion);
       const cumpleRango = fechaDev >= inicio && fechaDev <= fin;
       const cumpleEmpresa = filtros.empresa === 'todas' || dev.empresa === filtros.empresa;
-      const cumpleVendedor = filtros.vendedor === 'todos' || dev.vendedor === filtros.vendedor;
-      
+      const cumpleVendedor = filtros.vendedor === 'todos' || dev.vendedor_nombre === filtros.vendedor;
+
       return cumpleRango && cumpleEmpresa && cumpleVendedor;
     });
   }, [devoluciones, filtros]);
@@ -107,17 +107,45 @@ const Reportes = () => {
     };
   }, [devolucionesFiltradas]);
 
-  // Top 10 vendedores
+  // Top 10 vendedores con análisis detallado
   const topVendedores = useMemo(() => {
     const conteo = {};
     devolucionesFiltradas.forEach(dev => {
-      if (dev.vendedor) {
-        conteo[dev.vendedor] = (conteo[dev.vendedor] || 0) + 1;
+      if (dev.vendedor_nombre) {
+        if (!conteo[dev.vendedor_nombre]) {
+          conteo[dev.vendedor_nombre] = {
+            total: 0,
+            finalizadas: 0,
+            enProceso: 0,
+            conExcepcion: 0,
+            rechazadas: 0,
+            productos: new Set(),
+            empresas: new Set()
+          };
+        }
+        conteo[dev.vendedor_nombre].total++;
+        conteo[dev.vendedor_nombre].productos.add(dev.producto);
+        conteo[dev.vendedor_nombre].empresas.add(dev.empresa);
+
+        if (dev.estado_actual === 'registrada_pnv') conteo[dev.vendedor_nombre].finalizadas++;
+        else if (dev.estado_actual === 'rechazada') conteo[dev.vendedor_nombre].rechazadas++;
+        else conteo[dev.vendedor_nombre].enProceso++;
+
+        if (dev.tipo_excepcion) conteo[dev.vendedor_nombre].conExcepcion++;
       }
     });
 
     return Object.entries(conteo)
-      .map(([vendedor, cantidad]) => ({ vendedor, cantidad }))
+      .map(([vendedor, datos]) => ({
+        vendedor,
+        cantidad: datos.total,
+        finalizadas: datos.finalizadas,
+        enProceso: datos.enProceso,
+        conExcepcion: datos.conExcepcion,
+        rechazadas: datos.rechazadas,
+        numProductos: datos.productos.size,
+        empresas: Array.from(datos.empresas).join(', ')
+      }))
       .sort((a, b) => b.cantidad - a.cantidad)
       .slice(0, 10);
   }, [devolucionesFiltradas]);
@@ -172,16 +200,27 @@ const Reportes = () => {
 
   const exportarDatos = () => {
     const csv = [
-      ['Vendedor', 'Cantidad de Devoluciones'],
-      ...topVendedores.map(v => [v.vendedor, v.cantidad])
+      ['Vendedor', 'Total', 'Finalizadas', 'En Proceso', 'Rechazadas', 'Con Excepción', '# Productos', 'Empresas', '% del Total'],
+      ...topVendedores.map(v => [
+        v.vendedor,
+        v.cantidad,
+        v.finalizadas,
+        v.enProceso,
+        v.rechazadas,
+        v.conExcepcion,
+        v.numProductos,
+        v.empresas,
+        ((v.cantidad / devolucionesFiltradas.length) * 100).toFixed(1) + '%'
+      ])
     ].map(row => row.join(',')).join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `reporte_devoluciones_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   if (loading && devoluciones.length === 0) {
@@ -342,74 +381,144 @@ const Reportes = () => {
 
       {/* Gráficos */}
       <div className="graficos-section">
-        <div className="grafico-card grafico-pie">
-          <h2>🥧 Top 10 Vendedores con Más Devoluciones</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={topVendedores}
-                dataKey="cantidad"
-                nameKey="vendedor"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label={(entry) => `${entry.vendedor}: ${entry.cantidad}`}
-              >
-                {topVendedores.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="grafico-card grafico-barras">
+          <h2><User size={20} /> Top 10 Vendedores con Más Devoluciones</h2>
+          {topVendedores.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={topVendedores} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="category" dataKey="vendedor" angle={-45} textAnchor="end" height={100} />
+                <YAxis type="number" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '12px'
+                  }}
+                  formatter={(value, name) => {
+                    const labels = {
+                      cantidad: 'Total',
+                      finalizadas: 'Finalizadas',
+                      enProceso: 'En Proceso',
+                      rechazadas: 'Rechazadas'
+                    };
+                    return [value, labels[name] || name];
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="cantidad" fill="#3b82f6" name="Total" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="finalizadas" fill="#10b981" name="Finalizadas" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="enProceso" fill="#f59e0b" name="En Proceso" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="rechazadas" fill="#ef4444" name="Rechazadas" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="estado-vacio">
+              <User size={48} />
+              <p>No hay datos de vendedores para mostrar</p>
+            </div>
+          )}
         </div>
 
         <div className="grafico-card grafico-linea">
-          <h2>📈 Tendencia de Devoluciones</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={tendenciaTemporal}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="fecha" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="cantidad" 
-                stroke="#3b82f6" 
-                strokeWidth={2}
-                name="Devoluciones"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <h2><TrendingUp size={20} /> Tendencia de Devoluciones</h2>
+          {tendenciaTemporal.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={tendenciaTemporal}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" />
+                <YAxis />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '12px'
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="cantidad"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  name="Devoluciones"
+                  dot={{ fill: '#3b82f6', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="estado-vacio">
+              <TrendingUp size={48} />
+              <p>No hay datos de tendencia para mostrar</p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Tabla de Top Vendedores */}
       <div className="tabla-vendedores">
-        <h2>📊 Detalle de Vendedores</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Posición</th>
-              <th>Vendedor</th>
-              <th>Cantidad</th>
-              <th>% del Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {topVendedores.map((v, idx) => (
-              <tr key={v.vendedor}>
-                <td className="posicion">#{idx + 1}</td>
-                <td>{v.vendedor}</td>
-                <td className="cantidad">{v.cantidad}</td>
-                <td className="porcentaje">
-                  {((v.cantidad / devolucionesFiltradas.length) * 100).toFixed(1)}%
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h2><Package size={20} /> Detalle Completo de Vendedores</h2>
+        {topVendedores.length > 0 ? (
+          <div className="tabla-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Vendedor</th>
+                  <th>Total</th>
+                  <th>Finalizadas</th>
+                  <th>En Proceso</th>
+                  <th>Rechazadas</th>
+                  <th>Con Excepción</th>
+                  <th># Productos</th>
+                  <th>Empresas</th>
+                  <th>% del Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topVendedores.map((v, idx) => (
+                  <tr key={v.vendedor}>
+                    <td className="posicion">#{idx + 1}</td>
+                    <td className="vendedor-nombre">
+                      <strong>{v.vendedor}</strong>
+                    </td>
+                    <td className="cantidad-total">{v.cantidad}</td>
+                    <td className="cantidad-finalizadas">
+                      <span className="badge badge-success">{v.finalizadas}</span>
+                    </td>
+                    <td className="cantidad-proceso">
+                      <span className="badge badge-warning">{v.enProceso}</span>
+                    </td>
+                    <td className="cantidad-rechazadas">
+                      <span className="badge badge-danger">{v.rechazadas}</span>
+                    </td>
+                    <td className="cantidad-excepcion">
+                      {v.conExcepcion > 0 ? (
+                        <span className="badge badge-info">{v.conExcepcion}</span>
+                      ) : (
+                        <span className="text-muted">0</span>
+                      )}
+                    </td>
+                    <td className="num-productos">{v.numProductos}</td>
+                    <td className="empresas">{v.empresas}</td>
+                    <td className="porcentaje">
+                      {((v.cantidad / devolucionesFiltradas.length) * 100).toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="estado-vacio">
+            <Package size={48} />
+            <h3>No hay datos disponibles</h3>
+            <p>Ajusta los filtros para ver información de vendedores</p>
+          </div>
+        )}
       </div>
     </div>
   );

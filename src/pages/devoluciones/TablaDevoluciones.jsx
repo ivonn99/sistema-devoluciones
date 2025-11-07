@@ -4,35 +4,47 @@ import useDevolucionesStore from "../../stores/devolucionesStore";
 import { supabase } from "../../config/supabase";
 import "./TablaDevoluciones.css";
 
-// 🕐 Helper para convertir timestamp UTC a hora CDMX
+// 🕐 Helper para convertir timestamp UTC a hora CDMX (maneja DST correctamente)
 const convertirAHoraCDMX = (fechaUTC) => {
   if (!fechaUTC) return "-";
-  
-  const fechaOriginal = new Date(fechaUTC);
-  const cdmxDate = new Date(fechaOriginal.getTime() - (6 * 60 * 60 * 1000));
-  
-  const dia = String(cdmxDate.getUTCDate()).padStart(2, '0');
-  const mes = String(cdmxDate.getUTCMonth() + 1).padStart(2, '0');
-  const año = cdmxDate.getUTCFullYear();
-  const horas = String(cdmxDate.getUTCHours()).padStart(2, '0');
-  const minutos = String(cdmxDate.getUTCMinutes()).padStart(2, '0');
-  const segundos = String(cdmxDate.getUTCSeconds()).padStart(2, '0');
-  
-  return `${dia}/${mes}/${año}, ${horas}:${minutos}:${segundos}`;
+
+  const fecha = new Date(fechaUTC);
+
+  // Usar toLocaleString con timezone de CDMX para manejar DST automáticamente
+  const opciones = {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+
+  const partes = new Intl.DateTimeFormat('es-MX', opciones).formatToParts(fecha);
+  const valores = Object.fromEntries(partes.map(p => [p.type, p.value]));
+
+  return `${valores.day}/${valores.month}/${valores.year}, ${valores.hour}:${valores.minute}:${valores.second}`;
 };
 
-// 🕐 Helper para solo fecha (sin hora)
+// 🕐 Helper para solo fecha (sin hora) con timezone CDMX
 const convertirSoloFechaCDMX = (fechaUTC) => {
   if (!fechaUTC) return "-";
-  
-  const fechaOriginal = new Date(fechaUTC);
-  const cdmxDate = new Date(fechaOriginal.getTime() - (6 * 60 * 60 * 1000));
-  
-  const dia = String(cdmxDate.getUTCDate()).padStart(2, '0');
-  const mes = String(cdmxDate.getUTCMonth() + 1).padStart(2, '0');
-  const año = cdmxDate.getUTCFullYear();
-  
-  return `${dia}/${mes}/${año}`;
+
+  const fecha = new Date(fechaUTC);
+
+  const opciones = {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  };
+
+  const partes = new Intl.DateTimeFormat('es-MX', opciones).formatToParts(fecha);
+  const valores = Object.fromEntries(partes.map(p => [p.type, p.value]));
+
+  return `${valores.day}/${valores.month}/${valores.year}`;
 };
 
 const TablaDevoluciones = ({ 
@@ -64,7 +76,6 @@ const TablaDevoluciones = ({
   const handleObserver = useCallback((entries) => {
     const [target] = entries;
     if (target.isIntersecting && hasMoreData && !isLoading) {
-      console.log("🔄 Cargando más registros...");
       onLoadMore();
     }
   }, [hasMoreData, isLoading, onLoadMore]);
@@ -72,14 +83,14 @@ const TablaDevoluciones = ({
   useEffect(() => {
     const element = observerTarget.current;
     // 🔧 Opciones optimizadas para móvil
-    const option = { 
+    const option = {
       threshold: 0,
       rootMargin: '200px' // Empieza a cargar 200px antes de llegar
     };
     const observer = new IntersectionObserver(handleObserver, option);
-    
+
     if (element) observer.observe(element);
-    
+
     return () => {
       if (element) observer.unobserve(element);
     };
@@ -92,10 +103,9 @@ const TablaDevoluciones = ({
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = window.innerHeight;
-      
+
       // Si estamos a 300px del final
       if (scrollHeight - scrollTop - clientHeight < 300 && hasMoreData && !isLoading) {
-        console.log("🔄 [Scroll] Cargando más registros...");
         onLoadMore();
       }
     };
@@ -105,12 +115,10 @@ const TablaDevoluciones = ({
   }, [hasMoreData, isLoading, onLoadMore]);
 
   const abrirDetalles = (devolucion) => {
-    console.log("🔍 Abriendo detalles de devolución:", devolucion);
     setSelectedDevolucion(devolucion);
   };
 
   const cerrarDetalles = () => {
-    console.log("❎ Cerrando modal de detalles");
     setSelectedDevolucion(null);
   };
 
