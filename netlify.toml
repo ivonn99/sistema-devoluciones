@@ -1,0 +1,22 @@
+# Configuración de Netlify para el Sistema de Devoluciones
+
+[build]
+  # Comando para construir el proyecto
+  command = "npm run build"
+  # Directorio donde se genera el build
+  publish = "dist"
+
+# Configuración de redirecciones para SPA (Single Page Application)
+# Esto asegura que todas las rutas funcionen correctamente
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Variables de entorno de ejemplo (DEBES configurarlas en el dashboard de Netlify)
+# NO pongas valores reales aquí por seguridad
+# Ve a: Site settings > Environment variables
+#
+# Variables requeridas:
+# - VITE_SUPABASE_URL
+# - VITE_SUPABASE_ANON_KEY
