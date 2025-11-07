@@ -225,7 +225,21 @@
   border-radius: 0.5rem;
   font-size: 1rem;
   font-family: inherit;
-  background: white;
+  background: white !important;
+  background-color: white !important;
+  color: #1e293b !important;
+}
+
+/* Prevenir estilos de autocompletado del navegador */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.search-input:-webkit-autofill,
+.search-input:-webkit-autofill:hover,
+.search-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #1e293b !important;
+  background-color: white !important;
 }
 
 .form-input:focus,
@@ -235,14 +249,15 @@
 .search-select:focus {
   outline: none;
   border-color: #3b82f6;
+  background: white !important;
 }
 
 .form-input:disabled,
 .form-select:disabled,
 .search-input:disabled,
 .search-select:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
 }
 
 .form-textarea {
