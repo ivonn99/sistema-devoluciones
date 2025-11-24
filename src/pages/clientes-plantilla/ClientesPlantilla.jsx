@@ -229,81 +229,125 @@ const ClientesPlantilla = () => {
   };
 
   return (
-    <div className="clientes-plantilla-container">
+    <div className="container-fluid py-4">
       {/* Header */}
-      <div className="header">
-        <div>
-          <h1>Clientes Plantilla</h1>
-          <p className="subtitle">Carga masiva de clientes desde archivo CSV o TSV</p>
+      <div className="card border-primary mb-4 shadow-sm">
+        <div className="card-header bg-primary text-white">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <h1 className="h3 mb-1 fw-bold">Clientes Plantilla</h1>
+              <p className="mb-0 opacity-75">Carga masiva de clientes desde archivo CSV o TSV</p>
+            </div>
+            <button className="btn btn-light d-flex align-items-center gap-2" onClick={downloadTemplate}>
+              <Download size={18} />
+              Descargar Plantilla CSV
+            </button>
+          </div>
         </div>
-        <button className="btn-download-template" onClick={downloadTemplate}>
-          <Download size={18} />
-          Descargar Plantilla CSV
-        </button>
       </div>
 
       {/* Upload Zone */}
-      <div
-        className={`upload-zone ${isDragging ? 'dragging' : ''}`}
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleClick}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,.tsv,.txt"
-          onChange={(e) => handleFileUpload(e.target.files[0])}
-          style={{ display: 'none' }}
-        />
+      <div className="card mb-4">
+        <div className="card-body">
+          <div
+            className={`border rounded p-5 text-center ${isDragging ? 'border-primary bg-light' : 'border-dashed'} hover-lift upload-zone`}
+            style={{ 
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleClick}
+            data-dragging={isDragging}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.tsv,.txt"
+              onChange={(e) => handleFileUpload(e.target.files[0])}
+              style={{ display: 'none' }}
+            />
 
-        <FileSpreadsheet size={48} className="upload-icon" />
-        <h3>Arrastra tu archivo CSV o TSV aquí</h3>
-        <p>o haz clic para seleccionar un archivo</p>
-        <small>El archivo debe contener las columnas: nombre, ruta_reparto</small>
+            <FileSpreadsheet size={64} className={`mb-3 ${isDragging ? 'text-primary' : 'text-muted'}`} />
+            <h4 className="mb-2">Arrastra tu archivo CSV o TSV aquí</h4>
+            <p className="text-muted mb-2">o haz clic para seleccionar un archivo</p>
+            <small className="text-muted">El archivo debe contener las columnas: <strong>nombre</strong>, <strong>ruta_reparto</strong></small>
+          </div>
+        </div>
       </div>
 
       {/* Progress */}
       {loading && (
-        <div className="progress-section">
-          <div className="spinner"></div>
-          <p>Procesando archivo...</p>
-          {uploadProgress !== null && (
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${uploadProgress}%` }}></div>
+        <div className="card mb-4">
+          <div className="card-body text-center">
+            <div className="spinner-border text-primary mb-3" role="status">
+              <span className="visually-hidden">Cargando...</span>
             </div>
-          )}
+            <p className="mb-2">Procesando archivo...</p>
+            {uploadProgress !== null && (
+              <div className="progress" style={{ height: '1.5rem' }}>
+                <div 
+                  className="progress-bar progress-bar-striped progress-bar-animated" 
+                  role="progressbar" 
+                  style={{ width: `${uploadProgress}%` }}
+                  aria-valuenow={uploadProgress} 
+                  aria-valuemin="0" 
+                  aria-valuemax="100"
+                >
+                  {uploadProgress}%
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Upload Result */}
       {uploadResult && (
-        <div className="result-section">
-          <div className="result-card success">
-            <CheckCircle size={24} />
-            <div>
-              <h3>¡Carga completada exitosamente!</h3>
-              <div className="result-stats">
-                <div className="stat">
-                  <span className="stat-label">Total procesados:</span>
-                  <span className="stat-value">{uploadResult.total}</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Nuevos insertados:</span>
-                  <span className="stat-value green">{uploadResult.insertados}</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Actualizados:</span>
-                  <span className="stat-value blue">{uploadResult.actualizados}</span>
-                </div>
-                {uploadResult.errores > 0 && (
-                  <div className="stat">
-                    <span className="stat-label">Errores:</span>
-                    <span className="stat-value red">{uploadResult.errores}</span>
+        <div className="card border-success mb-4">
+          <div className="card-body">
+            <div className="d-flex align-items-start gap-3">
+              <CheckCircle size={32} className="text-success flex-shrink-0" />
+              <div className="flex-grow-1">
+                <h5 className="text-success mb-3">¡Carga completada exitosamente!</h5>
+                <div className="row g-3">
+                  <div className="col-md-6 col-lg-3">
+                    <div className="card bg-light">
+                      <div className="card-body text-center">
+                        <div className="h4 mb-0 fw-bold">{uploadResult.total}</div>
+                        <small className="text-muted">Total procesados</small>
+                      </div>
+                    </div>
                   </div>
-                )}
+                  <div className="col-md-6 col-lg-3">
+                    <div className="card bg-success bg-opacity-10 border-success">
+                      <div className="card-body text-center">
+                        <div className="h4 mb-0 fw-bold text-success">{uploadResult.insertados}</div>
+                        <small className="text-muted">Nuevos insertados</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6 col-lg-3">
+                    <div className="card bg-info bg-opacity-10 border-info">
+                      <div className="card-body text-center">
+                        <div className="h4 mb-0 fw-bold text-info">{uploadResult.actualizados}</div>
+                        <small className="text-muted">Actualizados</small>
+                      </div>
+                    </div>
+                  </div>
+                  {uploadResult.errores > 0 && (
+                    <div className="col-md-6 col-lg-3">
+                      <div className="card bg-danger bg-opacity-10 border-danger">
+                        <div className="card-body text-center">
+                          <div className="h4 mb-0 fw-bold text-danger">{uploadResult.errores}</div>
+                          <small className="text-muted">Errores</small>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -312,23 +356,21 @@ const ClientesPlantilla = () => {
 
       {/* Error */}
       {error && (
-        <div className="result-section">
-          <div className="result-card error">
-            <XCircle size={24} />
-            <div>
-              <h3>Error al procesar archivo</h3>
-              <p>{error}</p>
-            </div>
+        <div className="alert alert-danger d-flex align-items-start gap-3 mb-4">
+          <XCircle size={24} className="flex-shrink-0" />
+          <div>
+            <h5 className="alert-heading mb-2">Error al procesar archivo</h5>
+            <p className="mb-0">{error}</p>
           </div>
         </div>
       )}
 
       {/* Info Box */}
-      <div className="info-box">
-        <AlertTriangle size={20} />
+      <div className="alert alert-info d-flex align-items-start gap-3 mb-4">
+        <AlertTriangle size={24} className="flex-shrink-0" />
         <div>
           <strong>Importante:</strong>
-          <ul>
+          <ul className="mb-0 mt-2">
             <li>Si el cliente YA existe (mismo nombre), se actualizará su ruta de reparto</li>
             <li>Si el cliente NO existe, se insertará como nuevo registro</li>
             <li>El archivo debe tener las columnas: <code>nombre</code>, <code>ruta_reparto</code></li>
@@ -338,34 +380,38 @@ const ClientesPlantilla = () => {
       </div>
 
       {/* Tabla de ejemplo del formato */}
-      <div className="clientes-section">
-        <h2>Ejemplo de formato</h2>
-        <p className="ejemplo-descripcion">
-          Tu archivo CSV o TSV debe tener este formato. La primera fila debe contener los nombres de las columnas.
-        </p>
-        <div className="tabla-wrapper">
-          <table className="tabla-clientes">
-            <thead>
-              <tr>
-                <th>nombre</th>
-                <th>ruta_reparto</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="ejemplo-cell">Cliente Ejemplo 1</td>
-                <td className="ejemplo-cell">Ruta A</td>
-              </tr>
-              <tr>
-                <td className="ejemplo-cell">Cliente Ejemplo 2</td>
-                <td className="ejemplo-cell">Ruta B</td>
-              </tr>
-              <tr>
-                <td className="ejemplo-cell">Cliente Ejemplo 3</td>
-                <td className="ejemplo-cell">Ruta C</td>
-              </tr>
-            </tbody>
-          </table>
+      <div className="card">
+        <div className="card-header">
+          <h5 className="mb-0">Ejemplo de formato</h5>
+        </div>
+        <div className="card-body">
+          <p className="text-muted mb-3">
+            Tu archivo CSV o TSV debe tener este formato. La primera fila debe contener los nombres de las columnas.
+          </p>
+          <div className="table-responsive">
+            <table className="table table-bordered table-sm">
+              <thead className="table-light">
+                <tr>
+                  <th>nombre</th>
+                  <th>ruta_reparto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Cliente Ejemplo 1</td>
+                  <td>Ruta A</td>
+                </tr>
+                <tr>
+                  <td>Cliente Ejemplo 2</td>
+                  <td>Ruta B</td>
+                </tr>
+                <tr>
+                  <td>Cliente Ejemplo 3</td>
+                  <td>Ruta C</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

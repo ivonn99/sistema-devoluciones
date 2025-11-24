@@ -326,179 +326,192 @@ const PendientesCredito = () => {
   };
 
   return (
-    <div className="pendientes-credito-container">
-      <div className="pendientes-credito-wrapper">
-        {/* Header */}
-        <div className="header-card">
-          <div className="header-top">
-            <div className="header-title-section">
-              <h1>
-                <FileText style={{ color: '#3b82f6' }} size={32} />
-                Pendientes Crédito y Cobranza
-              </h1>
-              <p>Valida la situación crediticia y registra en PNV</p>
+    <div className="container-fluid py-4">
+      {/* Header */}
+      <div className="card border-primary mb-4 shadow-sm">
+        <div className="card-header bg-primary text-white">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <FileText size={32} />
+              <div>
+                <h1 className="h3 mb-1 fw-bold">Pendientes Crédito y Cobranza</h1>
+                <p className="mb-0 opacity-75">Valida la situación crediticia y registra en PNV</p>
+              </div>
             </div>
-            <div className="header-counter">
-              <div className="counter-number">{devolucionesPendientes.length}</div>
-              <div className="counter-label">Pendientes</div>
+            <div className="text-center bg-white bg-opacity-50 rounded p-3">
+              <div className="display-4 fw-bold text-dark">{devolucionesPendientes.length}</div>
+              <div className="small fw-semibold">Pendientes</div>
             </div>
           </div>
-
-          {/* Filtros y Botón Recargar */}
-          <div className="filters-container">
-            <div className="filters-group">
-              <Filter size={20} style={{ color: '#6b7280' }} />
+        </div>
+        <div className="card-body bg-light">
+          {/* Filtros */}
+          <div className="row g-3 align-items-end">
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <Filter size={20} />
+                Empresa
+              </label>
               <select
                 value={filtroEmpresa}
                 onChange={(e) => setFiltroEmpresa(e.target.value)}
-                className="filter-select"
+                className="form-select"
               >
                 <option value="todas">Todas las empresas</option>
                 <option value="Distribuidora">Distribuidora</option>
                 <option value="Rodrigo">Rodrigo</option>
               </select>
-
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label fw-semibold">Tipo</label>
               <select
                 value={filtroExcepcion}
                 onChange={(e) => setFiltroExcepcion(e.target.value)}
-                className="filter-select"
+                className="form-select"
               >
                 <option value="todas">Todas</option>
                 <option value="normal">Flujo Normal</option>
                 <option value="excepcion">Excepciones Autorizadas</option>
               </select>
             </div>
-
-            <button
-              onClick={cargarDevoluciones}
-              disabled={loading}
-              className={`reload-button ${loading ? 'loading' : ''}`}
-            >
-              <RefreshCw size={16} className={loading ? 'icon-spin' : ''} />
-              Recargar
-            </button>
+            <div className="col-md-12 col-lg-2">
+              <button
+                onClick={cargarDevoluciones}
+                disabled={loading}
+                className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+              >
+                <RefreshCw size={16} className={loading ? 'spinner-border spinner-border-sm' : ''} />
+                Recargar
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="error-alert">
-            <AlertCircle style={{ color: '#dc2626', flexShrink: 0 }} size={24} />
-            <p>{error}</p>
-          </div>
-        )}
+      {/* Error */}
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center gap-3 mb-4">
+          <AlertCircle size={24} />
+          <span>{error}</span>
+        </div>
+      )}
 
-        {/* Loading */}
-        {loading && devolucionesPendientes.length === 0 ? (
-          <div className="loading-container">
-            <RefreshCw size={48} className="loading-icon" />
-            <p className="loading-text">Cargando devoluciones...</p>
+      {/* Loading / Empty / List */}
+      {loading && devolucionesPendientes.length === 0 ? (
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <div className="spinner-border text-primary mb-3" role="status">
+              <span className="visually-hidden">Cargando...</span>
+            </div>
+            <p className="text-muted mb-0">Cargando devoluciones...</p>
           </div>
-        ) : devolucionesPendientes.length === 0 ? (
-          <div className="empty-state">
-            <CheckCircle style={{ color: '#10b981', margin: '0 auto 1rem' }} size={48} />
-            <h3>¡Todo al día!</h3>
-            <p>No hay devoluciones pendientes de validación</p>
+        </div>
+      ) : devolucionesPendientes.length === 0 ? (
+        <div className="card border-success">
+          <div className="card-body text-center py-5">
+            <CheckCircle size={64} className="text-success mb-3" />
+            <h3 className="h4 mb-2">¡Todo al día!</h3>
+            <p className="text-muted mb-0">No hay devoluciones pendientes de validación</p>
           </div>
-        ) : (
-          <div className="devoluciones-list">
-            {devolucionesPendientes.map((dev) => (
-              <DevolucionCard 
-                key={dev.id} 
-                devolucion={dev} 
+        </div>
+      ) : (
+        <div className="row g-4">
+          {devolucionesPendientes.map((dev) => (
+            <div key={dev.id} className="col-12">
+              <DevolucionCard
+                devolucion={dev}
                 onAprobar={() => abrirModal(dev, 'aprobar')}
                 onRechazar={() => abrirModal(dev, 'rechazar')}
                 onCorreccion={() => abrirModal(dev, 'correccion')}
               />
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
+      )}
 
-        {/* Modal */}
-        {modalAbierto && devolucionSeleccionada && (
-          <ModalAccion
-            devolucion={devolucionSeleccionada}
-            accion={accionActual}
-            motivo={motivo}
-            setMotivo={setMotivo}
-            observacionesCredito={observacionesCredito}
-            setObservacionesCredito={setObservacionesCredito}
-            onConfirmar={confirmarAccion}
-            onCerrar={cerrarModal}
-          />
-        )}
-      </div>
+      {/* Modal */}
+      {modalAbierto && devolucionSeleccionada && (
+        <ModalAccion
+          devolucion={devolucionSeleccionada}
+          accion={accionActual}
+          motivo={motivo}
+          setMotivo={setMotivo}
+          observacionesCredito={observacionesCredito}
+          setObservacionesCredito={setObservacionesCredito}
+          onConfirmar={confirmarAccion}
+          onCerrar={cerrarModal}
+        />
+      )}
     </div>
   );
 };
 
 // Componente Card de Devolución
 const DevolucionCard = ({ devolucion, onAprobar, onRechazar, onCorreccion }) => {
+  const esExcepcion = devolucion.estado_actual === 'autorizada';
+  const esFueraPlazo = devolucion.tipo_excepcion === 'fuera_plazo';
+
   return (
-    <div className="devolucion-card">
+    <div className="card border-0 shadow-sm">
       {/* Alerta de Excepción */}
-      {devolucion.estado_actual === 'autorizada' && (
-        <div className={`excepcion-alert ${devolucion.tipo_excepcion === 'fuera_plazo' ? 'fuera-plazo' : 'no-devolvible'}`}>
-          <div className="excepcion-content">
-            <AlertTriangle 
-              style={{ color: devolucion.tipo_excepcion === 'fuera_plazo' ? '#ea580c' : '#dc2626' }} 
-              size={20} 
+      {esExcepcion && (
+        <div className={`alert ${esFueraPlazo ? 'alert-warning' : 'alert-danger'} border-start border-4 mb-0 rounded-top rounded-bottom-0`}>
+          <div className="d-flex align-items-center gap-2 mb-2">
+            <AlertTriangle
+              style={{ color: esFueraPlazo ? '#ea580c' : '#dc2626' }}
+              size={20}
             />
-            <span className="excepcion-text">
-              {devolucion.tipo_excepcion === 'fuera_plazo' 
+            <span className="fw-bold">
+              {esFueraPlazo
                 ? `⚠️ EXCEPCIÓN: Fuera de plazo (${devolucion.dias_diferencia} días, máx ${devolucion.plazo_maximo})`
                 : '🚫 EXCEPCIÓN: Producto NO devolvible'
               }
             </span>
-            <span className="excepcion-badge">
+            <span className="badge bg-success ms-auto">
               ✓ Autorizada por Administración
             </span>
           </div>
           {devolucion.motivo_autorizacion && (
-            <p className="excepcion-motivo">
+            <p className="mb-0 small">
               <strong>Motivo autorización:</strong> {devolucion.motivo_autorizacion}
             </p>
           )}
         </div>
       )}
 
-      <div className="devolucion-content">
+      <div className="card-body">
         {/* Info Principal */}
-        <div className="info-grid">
-          <div>
-            <div className="info-item-label">
+        <div className="row g-4 mb-4">
+          <div className="col-md-4">
+            <div className="d-flex align-items-center gap-2 text-muted mb-2">
               <FileText size={16} />
-              Nota de Venta
+              <span className="fw-semibold">Nota de Venta</span>
             </div>
-            <div className="info-item-value">{devolucion.numero_nota}</div>
-            <div style={{ marginTop: '0.25rem' }}>
-              <span className="info-item-badge">
-                {devolucion.empresa}
-              </span>
-            </div>
+            <div className="h5 mb-2">{devolucion.numero_nota}</div>
+            <span className="badge bg-primary">{devolucion.empresa}</span>
           </div>
 
-          <div>
-            <div className="info-item-label">
+          <div className="col-md-4">
+            <div className="d-flex align-items-center gap-2 text-muted mb-2">
               <Building2 size={16} />
-              Cliente
+              <span className="fw-semibold">Cliente</span>
             </div>
-            <div className="info-item-secondary">{devolucion.cliente}</div>
-            <div className="info-item-text">
+            <div className="fw-bold mb-2">{devolucion.cliente}</div>
+            <div className="text-muted small d-flex align-items-center gap-1">
               <User size={14} />
               {devolucion.vendedor_nombre}
             </div>
           </div>
 
-          <div>
-            <div className="info-item-label">
+          <div className="col-md-4">
+            <div className="d-flex align-items-center gap-2 text-muted mb-2">
               <Calendar size={16} />
-              Fechas
+              <span className="fw-semibold">Fechas</span>
             </div>
-            <div className="info-item-dates">
+            <div className="small">
               <div>Remisión: {new Date(devolucion.fecha_remision).toLocaleDateString('es-MX')}</div>
               <div>Devolución: {new Date(devolucion.fecha_devolucion).toLocaleDateString('es-MX')}</div>
-              <div className={`dias-diferencia ${devolucion.dias_diferencia <= devolucion.plazo_maximo ? 'dentro-plazo' : 'fuera-plazo'}`}>
+              <div className={`badge mt-1 ${devolucion.dias_diferencia <= devolucion.plazo_maximo ? 'bg-success' : 'bg-danger'}`}>
                 {devolucion.dias_diferencia} días ({devolucion.tipo_cliente})
               </div>
             </div>
@@ -506,63 +519,61 @@ const DevolucionCard = ({ devolucion, onAprobar, onRechazar, onCorreccion }) => 
         </div>
 
         {/* Productos */}
-        <div className="productos-container">
-          <div className="productos-header">
-            <Package size={18} />
-            Productos Devueltos
-            <span className="tipo-devolucion-badge">
+        <div className="mb-4">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <div className="d-flex align-items-center gap-2 fw-semibold">
+              <Package size={18} />
+              Productos Devueltos
+            </div>
+            <span className={`badge ${devolucion.tipo_devolucion === 'total' ? 'bg-danger' : 'bg-warning'}`}>
               {devolucion.tipo_devolucion === 'total' ? 'DEVOLUCIÓN TOTAL' : 'DEVOLUCIÓN PARCIAL'}
             </span>
           </div>
-          {devolucion.devoluciones_detalle?.map((prod, idx) => (
-            <div 
-              key={idx} 
-              className={`producto-item ${idx < devolucion.devoluciones_detalle.length - 1 ? 'with-border' : ''}`}
-            >
-              <div>
-                <div className="producto-info-name">{prod.concepto_sustancia}</div>
-                <div className="producto-info-estado">Estado: {prod.estado_producto}</div>
+          <div className="d-flex flex-column gap-2">
+            {devolucion.devoluciones_detalle?.map((prod, idx) => (
+              <div key={idx} className="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                <div>
+                  <div className="fw-medium">{prod.concepto_sustancia}</div>
+                  <small className="text-muted">Estado: {prod.estado_producto}</small>
+                </div>
+                <span className="badge bg-secondary">x{prod.cantidad}</span>
               </div>
-              <div className="producto-cantidad">
-                <div className="producto-cantidad-value">x{prod.cantidad}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Observaciones */}
         {devolucion.observaciones_almacen && (
-          <div className="observaciones-almacen">
-            <div className="observaciones-title">
-              📝 Observaciones de Almacén:
-            </div>
-            <div className="observaciones-text">{devolucion.observaciones_almacen}</div>
+          <div className="alert alert-primary mb-4">
+            <div className="fw-semibold mb-1">📝 Observaciones de Almacén:</div>
+            <div className="small">{devolucion.observaciones_almacen}</div>
           </div>
         )}
 
-        <div className="motivo-container">
+        {/* Motivo */}
+        <div className="p-3 bg-light rounded mb-4">
           <strong>Motivo:</strong> {devolucion.motivo_devolucion_general}
         </div>
 
         {/* Acciones */}
-        <div className="acciones-container">
+        <div className="d-flex gap-2 flex-wrap">
           <button
             onClick={onAprobar}
-            className="btn-accion btn-aprobar"
+            className="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center gap-2"
           >
             <CheckCircle size={20} />
             Aprobar y Registrar en PNV
           </button>
           <button
             onClick={onRechazar}
-            className="btn-accion btn-rechazar"
+            className="btn btn-danger d-flex align-items-center gap-2"
           >
             <XCircle size={20} />
             Rechazar
           </button>
           <button
             onClick={onCorreccion}
-            className="btn-accion btn-correccion"
+            className="btn btn-warning d-flex align-items-center gap-2"
           >
             <AlertCircle size={20} />
             Solicitar Corrección
@@ -574,88 +585,119 @@ const DevolucionCard = ({ devolucion, onAprobar, onRechazar, onCorreccion }) => 
 };
 
 // Componente Modal
-const ModalAccion = ({ 
-  devolucion, 
-  accion, 
-  motivo, 
-  setMotivo, 
-  observacionesCredito, 
+const ModalAccion = ({
+  devolucion,
+  accion,
+  motivo,
+  setMotivo,
+  observacionesCredito,
   setObservacionesCredito,
-  onConfirmar, 
-  onCerrar 
+  onConfirmar,
+  onCerrar
 }) => {
-  return (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <div className={`modal-header ${accion}`}>
-          <h2>
-            {accion === 'aprobar' && <CheckCircle style={{ color: '#10b981' }} />}
-            {accion === 'rechazar' && <XCircle style={{ color: '#ef4444' }} />}
-            {accion === 'correccion' && <AlertCircle style={{ color: '#f59e0b' }} />}
-            {accion === 'aprobar' && 'Aprobar y Registrar en PNV'}
-            {accion === 'rechazar' && 'Rechazar Devolución'}
-            {accion === 'correccion' && 'Solicitar Corrección'}
-          </h2>
-        </div>
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onCerrar();
+    }
+  };
 
-        <div className="modal-body">
-          <div className="modal-info-box">
-            <div className="modal-info-title">
-              Nota: {devolucion.numero_nota}
-            </div>
-            <div className="modal-info-item">
-              Cliente: {devolucion.cliente}
-            </div>
-            <div className="modal-info-item">
-              Vendedor: {devolucion.vendedor_nombre}
-            </div>
+  const getTitleAndIcon = () => {
+    switch (accion) {
+      case 'aprobar':
+        return { icon: <CheckCircle size={24} />, text: 'Aprobar y Registrar en PNV' };
+      case 'rechazar':
+        return { icon: <XCircle size={24} />, text: 'Rechazar Devolución' };
+      case 'correccion':
+        return { icon: <AlertCircle size={24} />, text: 'Solicitar Corrección' };
+      default:
+        return { icon: null, text: '' };
+    }
+  };
+
+  const { icon, text } = getTitleAndIcon();
+
+  const getHeaderColor = () => {
+    switch (accion) {
+      case 'aprobar': return 'bg-success';
+      case 'rechazar': return 'bg-danger';
+      case 'correccion': return 'bg-warning';
+      default: return 'bg-primary';
+    }
+  };
+
+  return (
+    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={handleOverlayClick} tabIndex="-1">
+      <div className="modal-dialog modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content">
+          <div className={`modal-header ${getHeaderColor()} text-white`}>
+            <h2 className="modal-title d-flex align-items-center gap-2 mb-0 h4 fw-bold">
+              {icon}
+              {text}
+            </h2>
+            <button onClick={onCerrar} className="btn-close btn-close-white" type="button"></button>
           </div>
 
+          <div className="modal-body">
+          {/* Info Box */}
+          <div className="alert alert-secondary mb-4">
+            <div className="fw-bold mb-2">Nota: {devolucion.numero_nota}</div>
+            <div className="small">Cliente: {devolucion.cliente}</div>
+            <div className="small">Vendedor: {devolucion.vendedor_nombre}</div>
+          </div>
+
+          {/* Aprobar */}
           {accion === 'aprobar' && (
-            <div className="modal-form-group">
-              <label className="modal-label">
+            <div className="mb-4">
+              <label className="form-label fw-semibold">
                 Observaciones de Crédito (opcional):
               </label>
               <textarea
                 value={observacionesCredito}
                 onChange={(e) => setObservacionesCredito(e.target.value)}
                 placeholder="Ej: Cuenta al corriente, sin adeudos..."
-                className="modal-textarea"
+                className="form-control"
+                rows="4"
               />
-              <p className="modal-help-text">
+              <small className="form-text text-muted">
                 Al aprobar, la devolución se registrará automáticamente en el sistema PNV.
-              </p>
+              </small>
             </div>
           )}
 
+          {/* Rechazar o Corrección */}
           {(accion === 'rechazar' || accion === 'correccion') && (
-            <div className="modal-form-group">
-              <label className={`modal-label ${accion === 'rechazar' ? 'rechazar' : ''}`}>
+            <div className="mb-4">
+              <label className="form-label fw-semibold">
                 {accion === 'rechazar' ? 'Motivo del rechazo *' : 'Detalles de la corrección *'}
               </label>
               <textarea
                 value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
                 placeholder={
-                  accion === 'rechazar' 
+                  accion === 'rechazar'
                     ? "Ej: Cliente tiene adeudos pendientes, no se puede procesar..."
                     : "Ej: Falta información del estado del producto en la línea 2..."
                 }
-                className={`modal-textarea ${accion === 'rechazar' ? 'rechazar' : ''}`}
+                className="form-control"
+                rows="4"
               />
             </div>
           )}
+        </div>
 
-          <div className="modal-actions">
+          {/* Footer */}
+          <div className="modal-footer">
             <button
               onClick={onCerrar}
-              className="btn-modal btn-cancelar"
+              className="btn btn-secondary"
+              type="button"
             >
               Cancelar
             </button>
             <button
               onClick={onConfirmar}
-              className={`btn-modal btn-confirmar ${accion}`}
+              className={`btn ${accion === 'aprobar' ? 'btn-success' : accion === 'rechazar' ? 'btn-danger' : 'btn-warning'} d-flex align-items-center gap-2`}
+              type="button"
             >
               Confirmar
             </button>

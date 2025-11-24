@@ -575,117 +575,135 @@ const PendientesRepresentante = () => {
   };
 
   return (
-    <div className="pendientes-representante-container">
-      <div className="pendientes-representante-wrapper">
-        <div className="header-card">
-          <div className="header-top">
-            <div className="header-title-section">
-              <h1>
-                <Shield style={{ color: '#8b5cf6' }} size={32} />
-                Autorización de Excepciones - Administración
-              </h1>
-              <p>Evalúa y autoriza devoluciones fuera de política</p>
+    <div className="container-fluid py-4">
+      {/* Header */}
+      <div className="card border-danger mb-4 shadow-sm">
+        <div className="card-header bg-danger text-white">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <Shield size={32} />
+              <div>
+                <h1 className="h3 mb-1 fw-bold">Autorización de Excepciones - Administración</h1>
+                <p className="mb-0 opacity-75">Evalúa y autoriza devoluciones fuera de política</p>
+              </div>
             </div>
-            <div className="header-counter">
-              <div className="counter-number">{devolucionesPendientes.length}</div>
-              <div className="counter-label">Excepciones</div>
+            <div className="text-center bg-white bg-opacity-50 rounded p-3">
+              <div className="display-4 fw-bold text-dark">{devolucionesPendientes.length}</div>
+              <div className="small fw-semibold">Excepciones</div>
             </div>
           </div>
-
-          <div className="filters-container">
-            <div className="filters-group">
-              <Filter size={20} style={{ color: '#6b7280' }} />
+        </div>
+        <div className="card-body bg-light">
+          {/* Filtros */}
+          <div className="row g-3 align-items-end">
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <Filter size={20} />
+                Empresa
+              </label>
               <select
                 value={filtroEmpresa}
                 onChange={(e) => setFiltroEmpresa(e.target.value)}
-                className="filter-select"
+                className="form-select"
               >
                 <option value="todas">Todas las empresas</option>
                 <option value="Distribuidora">Distribuidora</option>
                 <option value="Rodrigo">Rodrigo</option>
               </select>
-
+            </div>
+            <div className="col-md-6 col-lg-3">
+              <label className="form-label fw-semibold">Tipo de Excepción</label>
               <select
                 value={filtroExcepcion}
                 onChange={(e) => setFiltroExcepcion(e.target.value)}
-                className="filter-select"
+                className="form-select"
               >
                 <option value="todas">Todos los tipos</option>
                 <option value="fuera_plazo">Fuera de Plazo</option>
                 <option value="producto_no_devoluble">Producto No Devolvible</option>
               </select>
             </div>
-
-            <button
-              onClick={cargarDevoluciones}
-              disabled={loading}
-              className={`reload-button ${loading ? 'loading' : ''}`}
-            >
-              <RefreshCw size={16} className={loading ? 'icon-spin' : ''} />
-              Recargar
-            </button>
+            <div className="col-md-12 col-lg-2">
+              <button
+                onClick={cargarDevoluciones}
+                disabled={loading}
+                className="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2"
+              >
+                <RefreshCw size={16} className={loading ? 'spinner-border spinner-border-sm' : ''} />
+                Recargar
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {error && (
-          <div className="error-alert">
-            <AlertCircle style={{ color: '#dc2626', flexShrink: 0 }} size={24} />
-            <p>{error}</p>
-          </div>
-        )}
+      {/* Error */}
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center gap-3 mb-4">
+          <AlertCircle size={24} />
+          <span>{error}</span>
+        </div>
+      )}
 
-        {loading && devolucionesPendientes.length === 0 ? (
-          <div className="loading-container">
-            <RefreshCw size={48} className="loading-icon" />
-            <p className="loading-text">Cargando excepciones...</p>
+      {/* Loading / Empty / List */}
+      {loading && devolucionesPendientes.length === 0 ? (
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <div className="spinner-border text-danger mb-3" role="status">
+              <span className="visually-hidden">Cargando...</span>
+            </div>
+            <p className="text-muted mb-0">Cargando excepciones...</p>
           </div>
-        ) : devolucionesPendientes.length === 0 ? (
-          <div className="empty-state">
-            <CheckCircle style={{ color: '#10b981', margin: '0 auto 1rem' }} size={48} />
-            <h3>¡Sin excepciones!</h3>
-            <p>No hay devoluciones pendientes de autorización</p>
+        </div>
+      ) : devolucionesPendientes.length === 0 ? (
+        <div className="card border-success">
+          <div className="card-body text-center py-5">
+            <CheckCircle size={64} className="text-success mb-3" />
+            <h3 className="h4 mb-2">¡Sin excepciones!</h3>
+            <p className="text-muted mb-0">No hay devoluciones pendientes de autorización</p>
           </div>
-        ) : (
-          <div className="devoluciones-list">
-            {devolucionesPendientes.map((dev) => (
-              <DevolucionCard 
-                key={dev.id} 
-                devolucion={dev} 
+        </div>
+      ) : (
+        <div className="row g-4">
+          {devolucionesPendientes.map((dev) => (
+            <div key={dev.id} className="col-12">
+              <DevolucionCard
+                devolucion={dev}
                 onAutorizarCredito={() => abrirModal(dev, 'autorizar_credito')}
                 onAutorizarPNV={() => abrirModal(dev, 'autorizar_pnv')}
                 onRechazar={() => abrirModal(dev, 'rechazar')}
                 onCorreccion={() => abrirModal(dev, 'correccion')}
                 onEditarProductos={() => abrirModalEdicion(dev)}
               />
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
+      )}
 
-        {modalAbierto && devolucionSeleccionada && (
-          <ModalAccion
-            devolucion={devolucionSeleccionada}
-            accion={accionActual}
-            justificacion={justificacion}
-            setJustificacion={setJustificacion}
-            onConfirmar={confirmarAccion}
-            onCerrar={cerrarModal}
-          />
-        )}
+      {modalAbierto && devolucionSeleccionada && (
+        <ModalAccion
+          devolucion={devolucionSeleccionada}
+          accion={accionActual}
+          justificacion={justificacion}
+          setJustificacion={setJustificacion}
+          onConfirmar={confirmarAccion}
+          onCerrar={cerrarModal}
+        />
+      )}
 
-        {modalEdicionAbierto && devolucionSeleccionada && (
-          <ModalEdicionProductos
-            devolucion={devolucionSeleccionada}
-            productosEditables={productosEditables}
-            onAgregarProducto={agregarProducto}
-            onEditarProducto={editarProducto}
-            onEliminarProducto={eliminarProducto}
-            observacionesEdicion={observacionesEdicion}
-            setObservacionesEdicion={setObservacionesEdicion}
-            onConfirmar={guardarEdicion}
-            onCerrar={cerrarModalEdicion}
-          />
-        )}
-      </div>
+      {modalEdicionAbierto && devolucionSeleccionada && (
+        <ModalEdicionProductos
+          devolucion={devolucionSeleccionada}
+          productosEditables={productosEditables}
+          onAgregarProducto={agregarProducto}
+          onEditarProducto={editarProducto}
+          onEliminarProducto={eliminarProducto}
+          observacionesEdicion={observacionesEdicion}
+          setObservacionesEdicion={setObservacionesEdicion}
+          onConfirmar={guardarEdicion}
+          onCerrar={cerrarModalEdicion}
+        />
+      )}
     </div>
   );
 };
@@ -724,55 +742,54 @@ const DevolucionCard = ({
   };
 
   const excepcionInfo = getExcepcionInfo();
+  const alertClass = excepcionInfo.clase === 'fuera-plazo' ? 'alert-warning' : 'alert-danger';
 
   return (
-    <div className="devolucion-card">
-      <div className={`excepcion-badge ${excepcionInfo.clase}`}>
-        <div className="excepcion-header">
+    <div className="card border-0 shadow-sm">
+      {/* Badge de Excepción */}
+      <div className={`alert ${alertClass} border-start border-4 mb-0 rounded-top rounded-bottom-0`}>
+        <div className="d-flex align-items-center gap-2 mb-2">
           <AlertTriangle size={20} />
-          <span className="excepcion-titulo">
+          <span className="fw-bold">
             {excepcionInfo.icono} {excepcionInfo.titulo}
           </span>
         </div>
-        <p className="excepcion-descripcion">{excepcionInfo.descripcion}</p>
+        <p className="mb-0 small">{excepcionInfo.descripcion}</p>
       </div>
 
-      <div className="devolucion-content">
-        <div className="info-grid">
-          <div>
-            <div className="info-item-label">
+      <div className="card-body">
+        {/* Info Grid */}
+        <div className="row g-4 mb-4">
+          <div className="col-md-4">
+            <div className="d-flex align-items-center gap-2 text-muted mb-2">
               <FileText size={16} />
-              Nota de Venta
+              <span className="fw-semibold">Nota de Venta</span>
             </div>
-            <div className="info-item-value">{devolucion.numero_nota}</div>
-            <div style={{ marginTop: '0.25rem' }}>
-              <span className="info-item-badge">
-                {devolucion.empresa}
-              </span>
-            </div>
+            <div className="h5 mb-2">{devolucion.numero_nota}</div>
+            <span className="badge bg-primary">{devolucion.empresa}</span>
           </div>
 
-          <div>
-            <div className="info-item-label">
+          <div className="col-md-4">
+            <div className="d-flex align-items-center gap-2 text-muted mb-2">
               <Building2 size={16} />
-              Cliente
+              <span className="fw-semibold">Cliente</span>
             </div>
-            <div className="info-item-secondary">{devolucion.cliente}</div>
-            <div className="info-item-text">
+            <div className="fw-bold mb-2">{devolucion.cliente}</div>
+            <div className="text-muted small d-flex align-items-center gap-1">
               <User size={14} />
               {devolucion.vendedor_nombre}
             </div>
           </div>
 
-          <div>
-            <div className="info-item-label">
+          <div className="col-md-4">
+            <div className="d-flex align-items-center gap-2 text-muted mb-2">
               <Calendar size={16} />
-              Fechas
+              <span className="fw-semibold">Fechas</span>
             </div>
-            <div className="info-item-dates">
+            <div className="small">
               <div>Remisión: {new Date(devolucion.fecha_remision).toLocaleDateString('es-MX')}</div>
               <div>Devolución: {new Date(devolucion.fecha_devolucion).toLocaleDateString('es-MX')}</div>
-              <div className={`dias-diferencia ${devolucion.dias_diferencia <= devolucion.plazo_maximo ? 'dentro-plazo' : 'fuera-plazo'}`}>
+              <div className={`badge mt-1 ${devolucion.dias_diferencia <= devolucion.plazo_maximo ? 'bg-success' : 'bg-danger'}`}>
                 {devolucion.dias_diferencia} días ({devolucion.tipo_cliente})
               </div>
             </div>
@@ -780,77 +797,75 @@ const DevolucionCard = ({
         </div>
 
         {/* Productos */}
-        <div className="productos-container">
-          <div className="productos-header">
-            <Package size={18} />
-            Productos Devueltos
-            <span className="tipo-devolucion-badge">
+        <div className="mb-4">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <div className="d-flex align-items-center gap-2 fw-semibold">
+              <Package size={18} />
+              Productos Devueltos
+            </div>
+            <span className={`badge ${devolucion.tipo_devolucion === 'total' ? 'bg-danger' : 'bg-warning'}`}>
               {devolucion.tipo_devolucion === 'total' ? 'DEVOLUCIÓN TOTAL' : 'DEVOLUCIÓN PARCIAL'}
             </span>
           </div>
-          {devolucion.devoluciones_detalle?.map((prod, idx) => (
-            <div 
-              key={idx} 
-              className={`producto-item ${idx < devolucion.devoluciones_detalle.length - 1 ? 'with-border' : ''}`}
-            >
-              <div>
-                <div className="producto-info-name">{prod.concepto_sustancia}</div>
-                <div className="producto-info-estado">Estado: {prod.estado_producto}</div>
+          <div className="d-flex flex-column gap-2">
+            {devolucion.devoluciones_detalle?.map((prod, idx) => (
+              <div key={idx} className="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                <div>
+                  <div className="fw-medium">{prod.concepto_sustancia}</div>
+                  <small className="text-muted">Estado: {prod.estado_producto}</small>
+                </div>
+                <span className="badge bg-secondary">x{prod.cantidad}</span>
               </div>
-              <div className="producto-cantidad">
-                <div className="producto-cantidad-value">x{prod.cantidad}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Observaciones */}
         {devolucion.observaciones_almacen && (
-          <div className="observaciones-almacen">
-            <div className="observaciones-title">
-              📝 Observaciones de Almacén:
-            </div>
-            <div className="observaciones-text">{devolucion.observaciones_almacen}</div>
+          <div className="alert alert-info mb-4">
+            <div className="fw-semibold mb-1">📝 Observaciones de Almacén:</div>
+            <div className="small">{devolucion.observaciones_almacen}</div>
           </div>
         )}
 
-        <div className="motivo-container">
+        {/* Motivo */}
+        <div className="p-3 bg-light rounded mb-4">
           <strong>Motivo:</strong> {devolucion.motivo_devolucion_general}
         </div>
 
         {/* Acciones */}
-        <div className="acciones-container">
+        <div className="d-flex gap-2 flex-wrap">
           <button
             onClick={onEditarProductos}
-            className="btn-accion btn-editar"
+            className="btn btn-outline-secondary d-flex align-items-center gap-2"
           >
-            <Edit size={20} />
+            <Edit size={18} />
             Ajustar Productos
           </button>
           <button
             onClick={onAutorizarCredito}
-            className="btn-accion btn-autorizar"
+            className="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center gap-2"
           >
             <CheckCircle size={20} />
-            Autorizar y Enviar a Crédito
+            Autorizar → Crédito
           </button>
           <button
             onClick={onAutorizarPNV}
-            className="btn-accion btn-pnv"
+            className="btn btn-primary d-flex align-items-center gap-2"
           >
             <Send size={20} />
-            Autorizar y Registrar en PNV
+            Autorizar → PNV
           </button>
           <button
             onClick={onRechazar}
-            className="btn-accion btn-rechazar"
+            className="btn btn-danger d-flex align-items-center gap-2"
           >
             <XCircle size={20} />
             Rechazar
           </button>
           <button
             onClick={onCorreccion}
-            className="btn-accion btn-correccion"
+            className="btn btn-warning d-flex align-items-center gap-2"
           >
             <AlertCircle size={20} />
             Solicitar Corrección
@@ -930,63 +945,81 @@ const ModalAccion = ({
     }
   };
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <div className={`modal-header ${accion}`}>
-          <h2>
-            {getIcono()}
-            {getTituloModal()}
-          </h2>
-        </div>
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onCerrar();
+    }
+  };
 
-        <div className="modal-body">
-          <div className="modal-info-box">
-            <div className="modal-info-title">
-              Nota: {devolucion.numero_nota}
-            </div>
-            <div className="modal-info-item">
-              Cliente: {devolucion.cliente}
-            </div>
-            <div className="modal-info-item">
-              Vendedor: {devolucion.vendedor_nombre}
-            </div>
-            <div className="modal-info-item">
-              Tipo de excepción: {devolucion.tipo_excepcion === 'fuera_plazo' ? 'Fuera de Plazo' : 'Producto No Devolvible'}
-            </div>
+  const getHeaderColor = () => {
+    switch (accion) {
+      case 'autorizar_credito': return 'bg-success';
+      case 'autorizar_pnv': return 'bg-primary';
+      case 'rechazar': return 'bg-danger';
+      case 'correccion': return 'bg-warning';
+      default: return 'bg-danger';
+    }
+  };
+
+  return (
+    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={handleOverlayClick} tabIndex="-1">
+      <div className="modal-dialog modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content">
+          <div className={`modal-header ${getHeaderColor()} text-white`}>
+            <h2 className="modal-title d-flex align-items-center gap-2 mb-0 h4 fw-bold">
+              {getIcono()}
+              {getTituloModal()}
+            </h2>
+            <button onClick={onCerrar} className="btn-close btn-close-white" type="button"></button>
           </div>
 
-          <div className="modal-description">
+          <div className="modal-body">
+          {/* Info Box */}
+          <div className="alert alert-secondary mb-4">
+            <div className="fw-bold mb-2">Nota: {devolucion.numero_nota}</div>
+            <div className="small">Cliente: {devolucion.cliente}</div>
+            <div className="small">Vendedor: {devolucion.vendedor_nombre}</div>
+            <div className="small">Tipo de excepción: {devolucion.tipo_excepcion === 'fuera_plazo' ? 'Fuera de Plazo' : 'Producto No Devolvible'}</div>
+          </div>
+
+          {/* Descripción */}
+          <div className={`alert ${accion === 'autorizar_pnv' ? 'alert-warning' : 'alert-info'} mb-4`}>
             {getDescripcion()}
           </div>
 
-          <div className="modal-form-group">
-            <label className={`modal-label ${accion === 'rechazar' ? 'rechazar' : ''}`}>
-              {accion === 'rechazar' ? 'Justificación del rechazo *' : 
-               accion === 'correccion' ? 'Detalles de la corrección *' : 
+          {/* Textarea de Justificación */}
+          <div className="mb-4">
+            <label className="form-label fw-semibold">
+              {accion === 'rechazar' ? 'Justificación del rechazo *' :
+               accion === 'correccion' ? 'Detalles de la corrección *' :
                'Justificación de la autorización *'}
             </label>
             <textarea
               value={justificacion}
               onChange={(e) => setJustificacion(e.target.value)}
               placeholder={getPlaceholder()}
-              className={`modal-textarea ${accion === 'rechazar' ? 'rechazar' : ''}`}
+              className="form-control"
+              rows="4"
             />
-            <p className="modal-help-text">
+            <small className="form-text text-muted">
               * Este campo es obligatorio para documentar la decisión
-            </p>
+            </small>
           </div>
+        </div>
 
-          <div className="modal-actions">
+          {/* Footer */}
+          <div className="modal-footer">
             <button
               onClick={onCerrar}
-              className="btn-modal btn-cancelar"
+              className="btn btn-secondary"
+              type="button"
             >
               Cancelar
             </button>
             <button
               onClick={onConfirmar}
-              className={`btn-modal btn-confirmar ${accion}`}
+              className={`btn ${accion === 'autorizar_credito' ? 'btn-success' : accion === 'rechazar' ? 'btn-danger' : accion === 'correccion' ? 'btn-warning' : 'btn-primary'} d-flex align-items-center gap-2`}
+              type="button"
             >
               Confirmar
             </button>
@@ -998,139 +1031,146 @@ const ModalAccion = ({
 };
 
 // Componente Modal de Edición de Productos
-const ModalEdicionProductos = ({ 
-  devolucion, 
+const ModalEdicionProductos = ({
+  devolucion,
   productosEditables,
   onAgregarProducto,
   onEditarProducto,
   onEliminarProducto,
   observacionesEdicion,
   setObservacionesEdicion,
-  onConfirmar, 
-  onCerrar 
+  onConfirmar,
+  onCerrar
 }) => {
   return (
-    <div className="modal-overlay">
-      <div className="modal-content modal-edicion">
-        <div className="modal-header editar">
-          <h2 className="modal-title">
-            <Edit style={{ color: '#8b5cf6' }} />
-            Ajustar Productos - Nota {devolucion.numero_nota}
-          </h2>
-        </div>
+    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} tabIndex="-1">
+      <div className="modal-dialog modal-dialog-scrollable modal-xl">
+        <div className="modal-content">
+          <div className="modal-header bg-secondary text-white">
+            <h2 className="modal-title h4 mb-0 d-flex align-items-center gap-2">
+              <Edit size={24} />
+              Ajustar Productos - Nota {devolucion.numero_nota}
+            </h2>
+            <button onClick={onCerrar} className="btn-close btn-close-white" aria-label="Cerrar"></button>
+          </div>
 
-        <div className="modal-body">
-          <div className="info-alert">
-            <AlertTriangle style={{ color: '#d97706', flexShrink: 0 }} size={20} />
+          <div className="modal-body">
+          <div className="alert alert-warning d-flex align-items-start gap-3 border-start border-4 border-warning">
+            <AlertTriangle size={20} style={{ flexShrink: 0 }} />
             <div>
               <strong>Importante:</strong> Puedes agregar, editar o eliminar productos antes de autorizar la excepción.
               Esto permite corregir errores sin necesidad de solicitar corrección a Almacén.
             </div>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div className="productos-edit-header">
+          <div className="mb-4">
+            <div className="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
               <Package size={20} />
-              Productos Devueltos
-              <span className="productos-count-badge">
+              <span className="fw-bold">Productos Devueltos</span>
+              <span className="badge bg-secondary ms-2">
                 {productosEditables.length} producto{productosEditables.length !== 1 ? 's' : ''}
               </span>
             </div>
 
             {productosEditables.map((producto, index) => (
-              <div key={producto.id} className="producto-edit-card">
+              <div key={producto.id} className="card mb-3 border shadow-sm position-relative">
                 {producto.esNuevo && (
-                  <span className="producto-nuevo-badge">NUEVO</span>
+                  <span className="position-absolute top-0 start-0 badge bg-success rounded-0 rounded-bottom-end">
+                    NUEVO
+                  </span>
                 )}
 
                 <button
                   onClick={() => onEliminarProducto(index)}
-                  className="btn-eliminar-producto"
+                  className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 d-flex align-items-center gap-1"
                   title="Eliminar producto"
                 >
                   <Trash2 size={14} />
                   Quitar
                 </button>
 
-                <div className="producto-number">Producto #{index + 1}</div>
+                <div className="card-body pt-4">
+                  <div className="text-muted small mb-3">Producto #{index + 1}</div>
 
-                <div className="form-group">
-                  <label className="form-label">Concepto/Sustancia *</label>
-                  <input
-                    type="text"
-                    value={producto.concepto_sustancia}
-                    onChange={(e) => onEditarProducto(index, 'concepto_sustancia', e.target.value)}
-                    placeholder="Ej: Amoxicilina 500mg"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Cantidad *</label>
+                  <div className="mb-3">
+                    <label className="form-label fw-medium">Concepto/Sustancia *</label>
                     <input
-                      type="number"
-                      min="1"
-                      value={producto.cantidad}
-                      onChange={(e) => onEditarProducto(index, 'cantidad', parseInt(e.target.value) || 1)}
-                      className="form-input-number"
+                      type="text"
+                      value={producto.concepto_sustancia}
+                      onChange={(e) => onEditarProducto(index, 'concepto_sustancia', e.target.value)}
+                      placeholder="Ej: Amoxicilina 500mg"
+                      className="form-control"
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Estado del producto *</label>
-                    <select
-                      value={producto.estado_producto}
-                      onChange={(e) => onEditarProducto(index, 'estado_producto', e.target.value)}
-                      className="form-select"
-                    >
-                      <option value="buen_estado">Buen estado</option>
-                      <option value="danado_caducado">Dañado/Caducado</option>
-                      <option value="defecto_fabrica">Defecto de fábrica</option>
-                    </select>
-                  </div>
-                </div>
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Cantidad *</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={producto.cantidad}
+                        onChange={(e) => onEditarProducto(index, 'cantidad', parseInt(e.target.value) || 1)}
+                        className="form-control"
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label className="form-label">Comentarios</label>
-                  <textarea
-                    value={producto.comentarios || ''}
-                    onChange={(e) => onEditarProducto(index, 'comentarios', e.target.value)}
-                    placeholder="Observaciones adicionales del producto..."
-                    className="form-textarea"
-                    rows="2"
-                  />
+                    <div className="col-md-6">
+                      <label className="form-label fw-medium">Estado del producto *</label>
+                      <select
+                        value={producto.estado_producto}
+                        onChange={(e) => onEditarProducto(index, 'estado_producto', e.target.value)}
+                        className="form-select"
+                      >
+                        <option value="buen_estado">Buen estado</option>
+                        <option value="danado_caducado">Dañado/Caducado</option>
+                        <option value="defecto_fabrica">Defecto de fábrica</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mb-0">
+                    <label className="form-label fw-medium">Comentarios</label>
+                    <textarea
+                      value={producto.comentarios || ''}
+                      onChange={(e) => onEditarProducto(index, 'comentarios', e.target.value)}
+                      placeholder="Observaciones adicionales del producto..."
+                      className="form-control"
+                      rows="2"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
 
-            <button onClick={onAgregarProducto} className="btn-agregar-producto">
+            <button onClick={onAgregarProducto} className="btn btn-outline-success d-flex align-items-center gap-2 w-100">
               <PlusCircle size={20} />
               Agregar Producto
             </button>
           </div>
 
-          <div className="observaciones-edicion-container">
-            <label className="observaciones-edicion-label">
+          <div className="mb-4">
+            <label className="form-label fw-bold">
               Descripción de los ajustes realizados *
             </label>
             <textarea
               value={observacionesEdicion}
               onChange={(e) => setObservacionesEdicion(e.target.value)}
               placeholder="Describe qué ajustes realizaste... Ej: Se agregó Paracetamol 500mg que no estaba registrado. Se corrigió la cantidad del producto 1 de 3 a 5 unidades."
-              className="observaciones-edicion-textarea"
+              className="form-control"
               rows="3"
             />
-            <p className="observaciones-help-text">
+            <p className="text-muted small mt-2 mb-0">
               * Es importante documentar los cambios para mantener trazabilidad
             </p>
           </div>
+          </div>
 
           <div className="modal-footer">
-            <button onClick={onCerrar} className="btn-cancelar">
+            <button onClick={onCerrar} className="btn btn-secondary">
               Cancelar
             </button>
-            <button onClick={onConfirmar} className="btn-confirmar editar">
+            <button onClick={onConfirmar} className="btn btn-secondary d-flex align-items-center gap-2">
               <Edit size={20} />
               Guardar Ajustes
             </button>

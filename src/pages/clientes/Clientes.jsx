@@ -324,217 +324,221 @@ const Clientes = () => {
   }
 
   return (
-    <div className="clientes-container">
-      <div className="clientes-header">
-        <div className="header-titulo">
-          <Users size={32} style={{ color: '#3b82f6' }} />
-          <h1>Gestión de Clientes</h1>
-        </div>
-        <p className="header-descripcion">
-          Busca y administra clientes del sistema
-        </p>
-      </div>
-
-      <div className="clientes-actions">
-        <div className="search-box">
-          <Search size={20} style={{ color: '#6b7280' }} />
-          <input
-            type="text"
-            placeholder="Buscar cliente por nombre..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="search-clear"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={abrirModal}
-            className="btn-nuevo-cliente"
-          >
-            <PlusCircle size={20} />
-            Nuevo Cliente
-          </button>
-
-          {isAdmin && (
-            <button
-              onClick={handleDeleteAllClientes}
-              style={{
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontWeight: '500',
-                fontSize: '0.95rem',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#c82333'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#dc3545'}
-              title="Eliminar todos los clientes (Solo Admin)"
-            >
-              <Trash2 size={20} />
-              Eliminar Todos
-            </button>
-          )}
+    <div className="container-fluid py-4">
+      {/* Header */}
+      <div className="card border-primary mb-4 shadow-sm">
+        <div className="card-header bg-primary text-white">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <Users size={32} />
+              <div>
+                <h1 className="h3 mb-0 fw-bold">Gestión de Clientes</h1>
+                <p className="mb-0 opacity-75">Busca y administra clientes del sistema</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="clientes-info">
-        <p>
-          {loading ? (
-            'Buscando...'
-          ) : (
-            <>
-              Mostrando <strong>{clientes.length}</strong> cliente{clientes.length !== 1 ? 's' : ''}
-              {searchTerm && ` para "${searchTerm}"`}
-            </>
-          )}
-        </p>
+      {/* Acciones y búsqueda */}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="row g-3 align-items-end">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Buscar Cliente</label>
+              <div className="input-group">
+                <span className="input-group-text bg-white">
+                  <Search size={20} className="text-muted" />
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Buscar cliente por nombre..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                  >
+                    <X size={18} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="col-md-6 d-flex gap-2 justify-content-md-end">
+              <button
+                onClick={abrirModal}
+                className="btn btn-primary d-flex align-items-center gap-2"
+              >
+                <PlusCircle size={20} />
+                Nuevo Cliente
+              </button>
+              {isAdmin && (
+                <button
+                  onClick={handleDeleteAllClientes}
+                  className="btn btn-danger d-flex align-items-center gap-2"
+                  title="Eliminar todos los clientes (Solo Admin)"
+                >
+                  <Trash2 size={20} />
+                  Eliminar Todos
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="mt-3">
+            <small className="text-muted">
+              {loading ? (
+                'Buscando...'
+              ) : (
+                <>
+                  Mostrando <strong>{clientes.length}</strong> cliente{clientes.length !== 1 ? 's' : ''}
+                  {searchTerm && ` para "${searchTerm}"`}
+                </>
+              )}
+            </small>
+          </div>
+        </div>
       </div>
 
+      {/* Tabla de clientes */}
       {loading && clientes.length === 0 ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Cargando clientes...</p>
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <div className="spinner-border text-primary mb-3" role="status">
+              <span className="visually-hidden">Cargando...</span>
+            </div>
+            <p className="text-muted mb-0">Cargando clientes...</p>
+          </div>
         </div>
       ) : clientes.length === 0 ? (
-        <div className="empty-state">
-          <Users size={64} style={{ color: '#d1d5db', marginBottom: '1rem' }} />
-          <h3>No se encontraron clientes</h3>
-          <p>
-            {searchTerm
-              ? `No hay resultados para "${searchTerm}"`
-              : 'No hay clientes registrados'}
-          </p>
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <Users size={64} className="text-muted mb-3" />
+            <h3 className="h5">No se encontraron clientes</h3>
+            <p className="text-muted mb-0">
+              {searchTerm
+                ? `No hay resultados para "${searchTerm}"`
+                : 'No hay clientes registrados'}
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="clientes-tabla-container">
-          <table className="clientes-tabla">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Ruta de Reparto</th>
-                <th style={{ width: '100px', textAlign: 'center' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientes.map((cliente) => (
-                <tr key={cliente.id}>
-                  <td className="td-id">{cliente.id}</td>
-                  <td className="td-nombre">{cliente.nombre}</td>
-                  <td className="td-ruta">{cliente.ruta_reparto || '-'}</td>
-                  <td className="td-acciones">
-                    <button
-                      onClick={() => handleEliminar(cliente)}
-                      className="btn-eliminar"
-                      title="Eliminar cliente"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Indicador de carga al hacer scroll */}
-          {loadingMore && (
-            <div className="loading-more">
-              <div className="spinner-small"></div>
-              <p>Cargando más clientes...</p>
+        <div className="card">
+          <div className="card-body p-0">
+            <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+              <table className="table table-hover table-striped align-middle mb-0">
+                <thead className="table-light sticky-top">
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Ruta de Reparto</th>
+                    <th className="text-center" style={{ width: '100px' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clientes.map((cliente) => (
+                    <tr key={cliente.id}>
+                      <td className="fw-semibold">{cliente.id}</td>
+                      <td>{cliente.nombre}</td>
+                      <td className="text-muted">{cliente.ruta_reparto || '-'}</td>
+                      <td className="text-center">
+                        <button
+                          onClick={() => handleEliminar(cliente)}
+                          className="btn btn-danger btn-sm"
+                          title="Eliminar cliente"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-
-          {/* Indicador de que no hay más resultados */}
-          {!loadingMore && !hasMore && clientes.length > 0 && (
-            <div className="no-more-results">
-              <p>No hay más clientes para mostrar</p>
-            </div>
-          )}
+            {/* Indicador de carga al hacer scroll */}
+            {loadingMore && (
+              <div className="card-footer text-center py-3">
+                <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span className="visually-hidden">Cargando...</span>
+                </div>
+                <small className="text-muted">Cargando más clientes...</small>
+              </div>
+            )}
+            {/* Indicador de que no hay más resultados */}
+            {!loadingMore && !hasMore && clientes.length > 0 && (
+              <div className="card-footer text-center py-2">
+                <small className="text-success">✓ No hay más clientes para mostrar</small>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Modal Nuevo Cliente */}
       {modalAbierto && (
-        <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>
-                <PlusCircle size={24} style={{ marginRight: '0.5rem' }} />
-                Nuevo Cliente
-              </h2>
-              <button onClick={cerrarModal} className="modal-close">
-                <X size={24} />
-              </button>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={cerrarModal} tabIndex="-1">
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title d-flex align-items-center gap-2">
+                  <PlusCircle size={24} />
+                  Nuevo Cliente
+                </h5>
+                <button type="button" className="btn-close" onClick={cerrarModal}></button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                      <Users size={16} />
+                      Nombre del Cliente *
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={nuevoCliente.nombre}
+                      onChange={handleInputChange}
+                      placeholder="Ej: FARMACIA SAN JOSE"
+                      className="form-control"
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">🚚 Ruta de Reparto</label>
+                    <input
+                      type="text"
+                      name="ruta_reparto"
+                      value={nuevoCliente.ruta_reparto}
+                      onChange={handleInputChange}
+                      placeholder="Ej: Ruta 1, Zona Norte"
+                      className="form-control"
+                    />
+                    <small className="text-muted">
+                      Opcional - Especifica la ruta de entrega
+                    </small>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    onClick={cerrarModal}
+                    className="btn btn-secondary"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary d-flex align-items-center gap-2"
+                  >
+                    <PlusCircle size={18} />
+                    Crear Cliente
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">
-                    <Users size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                    Nombre del Cliente *
-                  </label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={nuevoCliente.nombre}
-                    onChange={handleInputChange}
-                    placeholder="Ej: FARMACIA SAN JOSE"
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    🚚 Ruta de Reparto
-                  </label>
-                  <input
-                    type="text"
-                    name="ruta_reparto"
-                    value={nuevoCliente.ruta_reparto}
-                    onChange={handleInputChange}
-                    placeholder="Ej: Ruta 1, Zona Norte"
-                    className="form-input"
-                  />
-                  <small style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
-                    Opcional - Especifica la ruta de entrega
-                  </small>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  onClick={cerrarModal}
-                  className="btn-cancelar"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-guardar"
-                >
-                  <PlusCircle size={18} style={{ marginRight: '0.5rem' }} />
-                  Crear Cliente
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

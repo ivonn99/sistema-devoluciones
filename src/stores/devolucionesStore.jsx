@@ -240,6 +240,87 @@ const useDevolucionesStore = create((set, get) => ({
     });
   },
 
+  // 🆕 Fetch TODAS las devoluciones para reportes (sin paginación)
+  // Carga todas las devoluciones del último año (o más si se especifica)
+  fetchAllDevolucionesForReports: async (filtros = {}) => {
+    set({ loading: true, error: null });
+    try {
+      // Calcular fecha de inicio (último año, o desde que se especifique)
+      const hoy = new Date();
+      const fechaInicio = filtros.fechaDesde 
+        ? new Date(filtros.fechaDesde)
+        : (() => {
+            const fecha = new Date(hoy);
+            fecha.setFullYear(hoy.getFullYear() - 1);
+            return fecha;
+          })();
+      
+      // Formatear fecha para query (ISO format)
+      const fechaDesdeISO = fechaInicio.toISOString().split('T')[0];
+
+      console.log('📊 [Reportes] Cargando devoluciones desde:', fechaDesdeISO);
+
+      let query = supabase
+        .from('devoluciones')
+        .select(`
+          *,
+          devoluciones_detalle (*)
+        `, { count: 'exact' })
+        .gte('fecha_devolucion', fechaDesdeISO)
+        .order('fecha_devolucion', { ascending: false });
+
+      // Aplicar filtros adicionales si existen
+      if (filtros.empresa && filtros.empresa !== 'todas') {
+        query = query.eq('empresa', filtros.empresa);
+      }
+      if (filtros.estado_actual) {
+        query = query.eq('estado_actual', filtros.estado_actual);
+      }
+      if (filtros.proceso_en) {
+        query = query.eq('proceso_en', filtros.proceso_en);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        console.error('❌ Error en fetchAllDevolucionesForReports:', error);
+        throw error;
+      }
+
+      console.log(`✅ [Reportes] Cargadas ${data?.length || 0} devoluciones del último año`);
+
+      const fechaActual = new Date();
+      const devolucionesEnriquecidas = (data || []).map(dev => {
+        const fechaDev = new Date(dev.fecha_devolucion);
+        const dias_transcurridos = Math.floor((fechaActual - fechaDev) / (1000 * 60 * 60 * 24));
+        
+        return {
+          ...enriquecerConFechasCDMX(dev),
+          dias_transcurridos
+        };
+      });
+
+      // Contar vendedores únicos para debug
+      const vendedoresUnicos = [...new Set(devolucionesEnriquecidas.map(d => d.vendedor_nombre).filter(Boolean))];
+      console.log(`📊 [Reportes] Vendedores encontrados: ${vendedoresUnicos.length}`, vendedoresUnicos);
+
+      set({ 
+        loading: false 
+      });
+      
+      return { 
+        success: true, 
+        data: devolucionesEnriquecidas, 
+        count: count || devolucionesEnriquecidas.length 
+      };
+    } catch (error) {
+      console.error('❌ Error en fetchAllDevolucionesForReports:', error);
+      const errorMessage = parseSupabaseError(error);
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
   // 🆕 Búsqueda en servidor
   searchDevoluciones: async (searchTerm, filtros = {}, reset = false) => {
     if (!searchTerm || searchTerm.trim() === '') {

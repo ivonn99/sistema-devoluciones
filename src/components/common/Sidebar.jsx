@@ -12,10 +12,13 @@ import {
   ChevronRight,
   UsersRound,
   Trash2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { useState } from 'react';
 import useAuthStore from "../../stores/authStore";
+import useThemeStore from "../../stores/themeStore";
 import './Sidebar.css';
 
 // 🎯 Configuración del menú por roles
@@ -124,6 +127,7 @@ const menuConfig = {
 
 const Sidebar = () => {
   const { user, signOut } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // 🎯 Obtener opciones de menú según el rol del usuario
@@ -200,9 +204,17 @@ const Sidebar = () => {
         })}
       </nav>
 
-      {/* Footer - Logout */}
-      {user && (
-        <div className="sidebar-footer">
+      {/* Footer - Theme Toggle y Logout */}
+      <div className="sidebar-footer">
+        <button 
+          onClick={toggleTheme}
+          className="theme-toggle-btn"
+          title={isCollapsed ? (theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro') : ''}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          {!isCollapsed && <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>}
+        </button>
+        {user && (
           <button 
             onClick={handleLogout}
             className="logout-btn"
@@ -211,8 +223,8 @@ const Sidebar = () => {
             <LogOut size={20} />
             {!isCollapsed && <span>Cerrar Sesión</span>}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 };

@@ -1,14 +1,14 @@
-/* TablaDevoluciones.css - Optimizado para Infinite Scroll */
+/* TablaDevoluciones.css - Optimizado con Bootstrap */
+
 /* ========== CONTENEDOR PRINCIPAL ========== */
 .tabla-container {
-  background: white;
-  border-radius: 8px;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  height: calc(100vh - 80px); /* Altura maximizada para ver más registros */
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 /* ========== SCROLL DE TABLA ========== */
@@ -16,16 +16,14 @@
   flex: 1;
   width: 100%;
   overflow-x: auto;
-  overflow-y: auto; /* Scroll vertical propio */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1rem;
   touch-action: pan-x pan-y;
-  /* Indicador de scroll más visible */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
-/* Personalizar scrollbar para Webkit (Chrome, Safari, Edge) */
 .tabla-scroll::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -45,153 +43,64 @@
   background: #94a3b8;
 }
 
-/* ========== TABLA ========== */
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
+/* ========== MEJORAS A TABLA BOOTSTRAP ========== */
+.tabla-scroll .table {
   font-size: 0.875rem;
-  background: white;
+  margin-bottom: 0;
 }
 
-.tabla thead {
-  background: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+.tabla-scroll .table thead {
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-.tabla th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: #374151;
+.tabla-scroll .table th {
   white-space: nowrap;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.tabla tbody tr {
-  border-bottom: 1px solid #f3f4f6;
-  transition: background-color 0.15s;
-}
-
-.tabla tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-.tabla td {
-  padding: 0.875rem 1rem;
-  color: #1f2937;
-  vertical-align: middle;
+  font-weight: 600;
 }
 
 /* ========== ESTADOS DE FILA ========== */
-.tabla tbody tr.estado-registrada {
-  border-left: 3px solid #3b82f6;
+.tabla-scroll .table tbody tr.estado-registrada {
+  border-left: 4px solid #3b82f6 !important;
 }
 
-.tabla tbody tr.estado-aprobada_almacen {
-  border-left: 3px solid #8b5cf6;
+.tabla-scroll .table tbody tr.estado-aprobada_almacen {
+  border-left: 4px solid #8b5cf6 !important;
 }
 
-.tabla tbody tr.estado-requiere_correccion {
-  border-left: 3px solid #f59e0b;
+.tabla-scroll .table tbody tr.estado-requiere_correccion {
+  border-left: 4px solid #f59e0b !important;
 }
 
-.tabla tbody tr.estado-requiere_autorizacion {
-  border-left: 3px solid #ef4444;
+.tabla-scroll .table tbody tr.estado-requiere_autorizacion {
+  border-left: 4px solid #ef4444 !important;
 }
 
-.tabla tbody tr.estado-autorizada {
-  border-left: 3px solid #10b981;
+.tabla-scroll .table tbody tr.estado-autorizada {
+  border-left: 4px solid #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.05);
 }
 
-.tabla tbody tr.estado-rechazada {
-  border-left: 3px solid #dc2626;
-  background-color: #fef2f2;
+.tabla-scroll .table tbody tr.estado-rechazada {
+  border-left: 4px solid #dc2626 !important;
+  background-color: #fef2f2 !important;
 }
 
-.tabla tbody tr.estado-registrada_pnv {
-  border-left: 3px solid #059669;
-  background-color: #f0fdf4;
+.tabla-scroll .table tbody tr.estado-registrada_pnv {
+  border-left: 4px solid #059669 !important;
+  background-color: #f0fdf4 !important;
 }
 
-/* ========== BADGES DE ESTADO ========== */
-.badge-estado {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  text-transform: lowercase;
+.tabla-scroll .table tbody tr:hover {
+  transform: scale(1.001);
+  transition: all 0.2s ease;
 }
 
-.badge-estado.registrada {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
+/* Los badges de estado ahora usan Bootstrap estándar, estos estilos no son necesarios */
 
-.badge-estado.aprobada_almacen {
-  background-color: #e0e7ff;
-  color: #5b21b6;
-}
-
-.badge-estado.requiere_correccion {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.badge-estado.requiere_autorizacion {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.badge-estado.autorizada {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.badge-estado.rechazada {
-  background-color: #fecaca;
-  color: #7f1d1d;
-}
-
-.badge-estado.registrada_pnv {
-  background-color: #d1fae5;
-  color: #064e3b;
-}
-
-/* ========== BOTÓN VER ========== */
-.btn-ver {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  min-width: 90px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.btn-ver:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
-}
-
-.btn-ver:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
-}
+/* ========== BOTÓN VER (usando Bootstrap) ========== */
+/* Los botones ahora usan clases de Bootstrap: btn btn-primary btn-sm */
 
 /* ========== CONTENIDO DE CELDAS ========== */
 .td-content {
@@ -202,365 +111,384 @@
   white-space: nowrap;
 }
 
-/* ========== RESPONSIVE - MÓVIL ========== */
-@media (max-width: 768px) {
-  .tabla-container {
-    padding: 1rem;
-    border-radius: 6px;
-    height: calc(100vh - 150px); /* Ajuste para móvil */
-  }
-
-  .tabla-scroll {
-    overflow-x: auto;
-    overflow-y: auto;
-  }
-
-  .tabla {
-    font-size: 0.8rem;
-    /* Formato de tarjetas en móvil */
-    display: block;
-  }
-
-  .tabla thead {
-    display: none;
-  }
-
-  .tabla tbody {
-    display: block;
-  }
-
-  .tabla tbody tr {
-    display: block;
-    margin-bottom: 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 0.75rem;
-    background: white;
-  }
-
-  .tabla tbody tr:hover {
-    background: #f9fafb;
-  }
-
-  .tabla td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border: none;
-    text-align: right;
-  }
-
-  .tabla td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #6b7280;
-    margin-right: 1rem;
-    text-align: left;
-    flex: 1;
-  }
-
-  .tabla td .td-content {
-    flex: 1;
-    text-align: right;
-    max-width: none;
-  }
-
-  .btn-ver {
-    width: 100%;
-    justify-content: center;
-    margin-top: 0.5rem;
-  }
+/* ========== ANIMACIÓN SPIN ========== */
+.spin-animation {
+  animation: spin 1s linear infinite;
 }
 
-/* ========== MODAL ========== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 2rem 1rem;
-  backdrop-filter: blur(3px);
-  /* NO bloquear scroll de la página */
-  pointer-events: none;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.modal-container {
-  background: white;
-  border-radius: 12px;
-  max-width: 800px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+/* ========== MODAL (usando Bootstrap) ========== */
+/* El modal ahora usa la estructura estándar de Bootstrap */
+.modal.show {
+  display: block !important;
+}
+
+.modal.show .modal-dialog {
+  margin: 1.75rem auto;
+}
+
+/* Mejoras visuales al modal de Bootstrap */
+.modal-content {
+  border: none;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalFadeIn 0.25s ease-out;
-  -webkit-overflow-scrolling: touch;
-  position: relative;
-  /* Restaurar interacción solo en el modal */
-  pointer-events: auto;
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  border-radius: 0.75rem;
 }
 
 .modal-header {
-  position: sticky;
-  top: 0;
-  background: white;
-  padding: 1.5rem;
   border-bottom: 2px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.btn-cerrar {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #6b7280;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.btn-cerrar:hover {
-  background: #f3f4f6;
-  color: #1f2937;
+  padding: 1.5rem;
 }
 
 .modal-body {
   padding: 1.5rem;
 }
 
-.bloque {
-  margin-bottom: 2rem;
-}
-
-.bloque:last-child {
-  margin-bottom: 0;
-}
-
-.bloque h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.lista-info {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.lista-info li {
-  padding: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 1rem;
-}
-
-.lista-info li:last-child {
-  border-bottom: none;
-}
-
-.lista-info li strong {
-  color: #6b7280;
-  font-weight: 600;
-  min-width: 180px;
-}
-
-/* ========== SEGUIMIENTO ========== */
-.seguimiento-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.seguimiento-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  background: #f9fafb;
-}
-
-.seguimiento-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.seguimiento-numero {
-  background: #3b82f6;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 600;
-  font-size: 0.75rem;
-}
-
-.seguimiento-fecha {
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.seguimiento-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.seguimiento-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.75rem;
-}
-
-.seguimiento-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.seguimiento-field.full-width {
-  grid-column: 1 / -1;
-}
-
-.field-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.field-value {
-  font-size: 0.875rem;
-  color: #1f2937;
-}
-
-.badge-area,
-.badge-accion,
-.badge-proceso {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.seguimiento-cambio {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: white;
-  border-radius: 6px;
-}
-
-.cambio-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-}
-
-.cambio-flujo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.cambio-flecha {
-  color: #9ca3af;
-  font-weight: 700;
-}
-
-/* ========== RESPONSIVE MODAL ========== */
-@media (max-width: 768px) {
-  .modal-overlay {
-    padding: 1rem 0.5rem;
-  }
-
-  .modal-container {
-    max-height: 80vh;
-    border-radius: 12px;
-    max-width: 100%;
-  }
-
-  .modal-header {
+/* ========== CARDS VIEW (MÓVIL Y TABLET) ========== */
+@media (max-width: 992px) {
+  .tabla-container {
     padding: 1rem;
-    border-radius: 12px 12px 0 0;
   }
 
-  .modal-header h2 {
-    font-size: 1.125rem;
+  .tabla-scroll {
+    overflow: visible;
   }
 
+  /* Ocultar tabla en pantallas pequeñas */
+  .tabla-scroll .table {
+    display: none;
+  }
+
+  /* Mostrar cards */
+  .cards-view {
+    display: block;
+  }
+
+  .card-devolucion {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-left: 4px solid #3b82f6;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-devolucion:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .card-devolucion.estado-registrada {
+    border-left-color: #3b82f6;
+  }
+
+  .card-devolucion.estado-aprobada_almacen {
+    border-left-color: #8b5cf6;
+  }
+
+  .card-devolucion.estado-requiere_correccion {
+    border-left-color: #f59e0b;
+  }
+
+  .card-devolucion.estado-requiere_autorizacion {
+    border-left-color: #ef4444;
+  }
+
+  .card-devolucion.estado-autorizada {
+    border-left-color: #10b981;
+  }
+
+  .card-devolucion.estado-rechazada {
+    border-left-color: #dc2626;
+    background: linear-gradient(to right, #fef2f2 0%, white 5%);
+  }
+
+  .card-devolucion.estado-registrada_pnv {
+    border-left-color: #059669;
+    background: linear-gradient(to right, #f0fdf4 0%, white 5%);
+  }
+  
+  /* Modo oscuro para cards con gradientes */
+  [data-theme="dark"] .card-devolucion.estado-rechazada {
+    background: linear-gradient(to right, rgba(220, 38, 38, 0.15) 0%, #1e293b 5%) !important;
+  }
+  
+  [data-theme="dark"] .card-devolucion.estado-registrada_pnv {
+    background: linear-gradient(to right, rgba(5, 150, 105, 0.15) 0%, #1e293b 5%) !important;
+  }
+
+  .card-devolucion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .card-devolucion-id {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1e40af;
+    margin-bottom: 0.25rem;
+  }
+
+  .card-devolucion-cliente {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.95rem;
+  }
+
+  .card-devolucion-estado {
+    margin-top: 0.25rem;
+  }
+
+  .card-devolucion-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-devolucion-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-devolucion-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+  }
+
+  .card-devolucion-value {
+    font-size: 0.875rem;
+    color: #111827;
+    font-weight: 500;
+  }
+
+  .card-devolucion-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .card-devolucion-actions {
+    width: 100%;
+  }
+
+  .modal.show .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-header,
   .modal-body {
     padding: 1rem;
   }
+}
 
-  .lista-info li {
-    flex-direction: column;
-    align-items: start;
-    padding: 0.625rem;
+/* Ocultar cards en desktop */
+@media (min-width: 993px) {
+  .cards-view {
+    display: none;
   }
+}
 
-  .lista-info li strong {
-    min-width: auto;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-  }
+/* ========== MODO OSCURO ========== */
+[data-theme="dark"] .tabla-container {
+  background: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 
-  .seguimiento-row {
-    grid-template-columns: 1fr;
-  }
+[data-theme="dark"] .tabla-scroll::-webkit-scrollbar-track {
+  background: #0f172a;
+}
 
-  .btn-cerrar {
-    width: 36px;
-    height: 36px;
-    font-size: 1.25rem;
-  }
+[data-theme="dark"] .tabla-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+[data-theme="dark"] .tabla-scroll::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+[data-theme="dark"] .card-devolucion {
+  background: #1e293b;
+  border-left-color: #3b82f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .card-devolucion:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .card-devolucion-header {
+  border-bottom-color: #334155;
+}
+
+[data-theme="dark"] .card-devolucion-footer {
+  border-top-color: #334155;
+}
+
+[data-theme="dark"] .card-devolucion-label {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .card-devolucion-value {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .card-devolucion-id {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .card-devolucion-cliente {
+  color: #cbd5e1;
+}
+
+/* ========== ESTILOS DE MODO OSCURO PARA FILAS CON ESTADOS ESPECIALES ========== */
+/* Asegurar que las filas de la tabla sean visibles y legibles en modo oscuro */
+[data-theme="dark"] .tabla-scroll .table tbody tr {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr td {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+/* Asegurar que el contenido de las celdas sea legible */
+[data-theme="dark"] .tabla-scroll .table tbody tr td .td-content {
+  color: #f1f5f9 !important;
+}
+
+/* Asegurar que el texto en las celdas de todas las filas sea legible */
+[data-theme="dark"] .tabla-scroll .table tbody tr td,
+[data-theme="dark"] .tabla-scroll .table tbody tr td * {
+  color: #f1f5f9 !important;
+}
+
+/* Estado autorizada (excepciones) - destacar con fondo ligeramente diferente */
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-autorizada {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  border-left: 4px solid #10b981 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-autorizada td {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-autorizada td .td-content {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-autorizada td span,
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-autorizada td * {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-autorizada:hover {
+  background-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Estado requiere_autorizacion - destacar */
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-requiere_autorizacion {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  border-left: 4px solid #ef4444 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-requiere_autorizacion td {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-requiere_autorizacion td .td-content {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-requiere_autorizacion:hover {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+/* Estado rechazada - fondo más oscuro */
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-rechazada {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+  border-left: 4px solid #dc2626 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-rechazada td {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-rechazada td .td-content,
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-rechazada td span,
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-rechazada td * {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-rechazada:hover {
+  background-color: rgba(220, 38, 38, 0.25) !important;
+}
+
+/* Estado registrada_pnv - fondo verde oscuro */
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-registrada_pnv {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+  border-left: 4px solid #059669 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-registrada_pnv td {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-registrada_pnv td .td-content,
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-registrada_pnv td span,
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-registrada_pnv td * {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .tabla-scroll .table tbody tr.estado-registrada_pnv:hover {
+  background-color: rgba(5, 150, 105, 0.25) !important;
+}
+
+/* Cards con excepciones en modo oscuro */
+[data-theme="dark"] .card-devolucion.estado-autorizada {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.2) 0%, #1e293b 5%) !important;
+  border-left-color: #10b981 !important;
+}
+
+[data-theme="dark"] .card-devolucion.estado-autorizada .card-devolucion-value,
+[data-theme="dark"] .card-devolucion.estado-autorizada .card-devolucion-label,
+[data-theme="dark"] .card-devolucion.estado-autorizada .card-devolucion-id,
+[data-theme="dark"] .card-devolucion.estado-autorizada .card-devolucion-cliente {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .card-devolucion.estado-requiere_autorizacion {
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.15) 0%, #1e293b 5%) !important;
+  border-left-color: #ef4444 !important;
+}
+
+[data-theme="dark"] .card-devolucion.estado-rechazada {
+  background: linear-gradient(to right, rgba(220, 38, 38, 0.15) 0%, #1e293b 5%) !important;
+  border-left-color: #dc2626 !important;
+}
+
+[data-theme="dark"] .card-devolucion.estado-registrada_pnv {
+  background: linear-gradient(to right, rgba(5, 150, 105, 0.15) 0%, #1e293b 5%) !important;
+  border-left-color: #059669 !important;
 }

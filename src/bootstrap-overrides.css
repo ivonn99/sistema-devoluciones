@@ -1,0 +1,419 @@
+/* ========================================
+   BOOTSTRAP OVERRIDES Y ESTILOS COMPARTIDOS
+   ======================================== */
+
+/* Variables de colores personalizadas */
+:root {
+  --primary-green: #00FF7F;
+  --primary-green-dark: #007F3E;
+  --primary-blue: #3b82f6;
+  --primary-blue-dark: #2563eb;
+  
+  /* Variables para modo oscuro */
+  --bg-dark: #0f172a;
+  --surface-dark: #1e293b;
+  --text-dark: #f1f5f9;
+  --text-light-dark: #cbd5e1;
+  --border-dark: #334155;
+}
+
+/* Modo claro (por defecto) - asegurar valores por defecto */
+:root,
+[data-theme="light"] {
+  --bs-body-bg: #F5F7FA;
+  --bs-body-color: #333333;
+  --bs-border-color: #dee2e6;
+}
+
+/* Modo oscuro */
+[data-theme="dark"] {
+  --bs-body-bg: #0f172a;
+  --bs-body-color: #f1f5f9;
+  --bs-border-color: #334155;
+}
+
+[data-theme="dark"] .card {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .table {
+  --bs-table-bg: #1e293b;
+  --bs-table-color: #f1f5f9;
+  --bs-table-border-color: #334155;
+  --bs-table-striped-bg: #273549;
+  --bs-table-hover-bg: #334155;
+  --bs-table-hover-color: #f1f5f9;
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .table-light {
+  --bs-table-bg: #273549;
+  --bs-table-color: #f1f5f9;
+  background-color: #273549 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .table thead th {
+  background-color: #273549 !important;
+  color: #f1f5f9 !important;
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme="dark"] .table tbody td {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .table tbody tr {
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .table-responsive {
+  background-color: #1e293b;
+}
+
+/* Asegurar que las tablas siempre sean visibles */
+.table {
+  display: table !important;
+}
+
+.table-responsive .table {
+  display: table !important;
+  width: 100% !important;
+}
+
+[data-theme="dark"] .table-responsive .table {
+  display: table !important;
+  width: 100% !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: #1e293b;
+  border-color: #3b82f6;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .alert {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .modal-content {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .modal-header {
+  border-bottom-color: #334155;
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .modal-body {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .modal-footer {
+  border-top-color: #334155;
+  background-color: #1e293b;
+}
+
+[data-theme="dark"] .list-group-item {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .list-group-item.active {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+[data-theme="dark"] .input-group-text {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .dropdown-menu {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .bg-white.bg-opacity-50 {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .table-light {
+  --bs-table-bg: #273549;
+  --bs-table-color: #f1f5f9;
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(even) > td {
+  background-color: #273549;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .border-light {
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .alert {
+  border-color: #334155;
+}
+
+[data-theme="dark"] .alert-info {
+  background-color: #1e3a5f;
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .alert-success {
+  background-color: #064e3b;
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .alert-warning {
+  background-color: #78350f;
+  border-color: #f59e0b;
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .alert-danger {
+  background-color: #7f1d1d;
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .progress {
+  background-color: #1e293b;
+}
+
+[data-theme="dark"] .input-group-text {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .shadow-sm {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .border-bottom {
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme="dark"] .border-top {
+  border-top-color: #334155 !important;
+}
+
+[data-theme="dark"] .border {
+  border-color: #334155 !important;
+}
+
+/* Estilos adicionales para elementos con fondos blancos */
+[data-theme="dark"] .card-header.bg-primary {
+  background-color: #1e3a8a !important;
+}
+
+[data-theme="dark"] .card-header.bg-success {
+  background-color: #065f46 !important;
+}
+
+[data-theme="dark"] .card-header.bg-warning {
+  background-color: #78350f !important;
+}
+
+[data-theme="dark"] .card-header.bg-danger {
+  background-color: #7f1d1d !important;
+}
+
+[data-theme="dark"] .card-header.bg-info {
+  background-color: #1e3a5f !important;
+}
+
+/* Scrollbar personalizado en modo oscuro */
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ========== ANIMACIONES GLOBALES ========== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* ========== UTILIDADES COMUNES ========== */
+.hover-lift {
+  transition: all 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ========== OVERRIDES DE BOTONES ========== */
+.btn-primary {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.btn-primary:hover {
+  background: var(--primary-blue-dark);
+  border-color: var(--primary-blue-dark);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  border: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #00e070 0%, #006835 100%);
+}
+
+/* ========== CARDS ========== */
+.card {
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* ========== FORMULARIOS ========== */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+/* ========== TABLAS ========== */
+.table-hover tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+[data-theme="dark"] .table-hover tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* ========== BADGES ========== */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+/* ========== SCROLLBAR PERSONALIZADO ========== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ========== RESPONSIVE UTILITIES ========== */
+@media (max-width: 768px) {
+  .container-xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

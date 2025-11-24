@@ -43,57 +43,80 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <form onSubmit={handleSubmit} className="login-form">
-        <h1>Iniciar Sesión</h1>
-       
-        {error && (
-          <div className="error-message">
-            {error}
+      <div className="login-form-wrapper">
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="text-center mb-4">
+            <div className="login-logo"></div>
+            <h1 className="h3 fw-bold text-white">Iniciar Sesión</h1>
+            <div className="login-divider"></div>
           </div>
-        )}
-       
-        <div className="form-group">
-          <label>Usuario</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            disabled={isSubmitting}
-            autoComplete="username"
-          />
-        </div>
-       
-        <div className="form-group">
-          <label>Contraseña</label>
-          <div className="password-input-wrapper">
+
+          {error && (
+            <div className="alert alert-danger d-flex align-items-center" role="alert">
+              <span className="me-2">⚠️</span>
+              <div>{error}</div>
+            </div>
+          )}
+
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label text-white-50 text-uppercase fw-semibold small">
+              Usuario
+            </label>
             <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type="text"
+              className="form-control form-control-lg"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               disabled={isSubmitting}
-              autoComplete="current-password"
+              autoComplete="username"
             />
-            <button
-              type="button"
-              className="password-toggle-btn"
-              onClick={togglePasswordVisibility}
-              disabled={isSubmitting}
-              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
           </div>
-        </div>
-       
-        <button
-          type="submit"
-          disabled={isSubmitting || loading}
-        >
-          {isSubmitting || loading ? "Iniciando sesión..." : "Ingresar"}
-        </button>
-      </form>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label text-white-50 text-uppercase fw-semibold small">
+              Contraseña
+            </label>
+            <div className="input-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control form-control-lg"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isSubmitting}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={togglePasswordVisibility}
+                disabled={isSubmitting}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-success btn-lg w-100 fw-semibold text-uppercase"
+            disabled={isSubmitting || loading}
+          >
+            {isSubmitting || loading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Iniciando sesión...
+              </>
+            ) : (
+              "Ingresar"
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

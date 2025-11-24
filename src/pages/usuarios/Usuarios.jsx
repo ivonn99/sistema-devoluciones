@@ -126,171 +126,207 @@ const Usuarios = () => {
   }
 
   return (
-    <div className="usuarios-container">
+    <div className="container-fluid py-4">
       {/* Header */}
-      <div className="usuarios-header">
-        <div className="header-left">
-          <Users size={32} />
-          <div>
-            <h1>Gestión de Usuarios</h1>
-            <p>Administra los usuarios del sistema</p>
+      <div className="card border-primary mb-4 shadow-sm">
+        <div className="card-header bg-primary text-white">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <Users size={32} />
+              <div>
+                <h1 className="h3 mb-0 fw-bold">Gestión de Usuarios</h1>
+                <p className="mb-0 opacity-75">Administra los usuarios del sistema</p>
+              </div>
+            </div>
+            <button className="btn btn-light d-flex align-items-center gap-2" onClick={handleNuevoUsuario}>
+              <UserPlus size={20} />
+              Nuevo Usuario
+            </button>
           </div>
         </div>
-        <button className="btn-nuevo-usuario" onClick={handleNuevoUsuario}>
-          <UserPlus size={20} />
-          Nuevo Usuario
-        </button>
       </div>
 
       {/* Estadísticas */}
-      <div className="stats-grid">
-        <div className="stat-card stat-primary">
-          <div className="stat-icon">
-            <Users size={24} />
-          </div>
-          <div className="stat-content">
-            <span className="stat-label">Total Usuarios</span>
-            <span className="stat-value">{estadisticas.total}</span>
-          </div>
-        </div>
-
-        <div className="stat-card stat-success">
-          <div className="stat-icon">
-            <Power size={24} />
-          </div>
-          <div className="stat-content">
-            <span className="stat-label">Activos</span>
-            <span className="stat-value">{estadisticas.activos}</span>
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="card border-primary hover-lift">
+            <div className="card-body d-flex align-items-center gap-3">
+              <Users size={32} className="text-primary" />
+              <div>
+                <div className="h4 mb-0 fw-bold text-primary">{estadisticas.total}</div>
+                <small className="text-muted">Total Usuarios</small>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="stat-card stat-danger">
-          <div className="stat-icon">
-            <Power size={24} />
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="card border-success hover-lift">
+            <div className="card-body d-flex align-items-center gap-3">
+              <Power size={32} className="text-success" />
+              <div>
+                <div className="h4 mb-0 fw-bold text-success">{estadisticas.activos}</div>
+                <small className="text-muted">Activos</small>
+              </div>
+            </div>
           </div>
-          <div className="stat-content">
-            <span className="stat-label">Inactivos</span>
-            <span className="stat-value">{estadisticas.inactivos}</span>
+        </div>
+
+        <div className="col-12 col-sm-6 col-lg-3">
+          <div className="card border-danger hover-lift">
+            <div className="card-body d-flex align-items-center gap-3">
+              <Power size={32} className="text-danger" />
+              <div>
+                <div className="h4 mb-0 fw-bold text-danger">{estadisticas.inactivos}</div>
+                <small className="text-muted">Inactivos</small>
+              </div>
+            </div>
           </div>
         </div>
 
         {estadisticas.porRol.map((rol, idx) => (
-          <div key={idx} className="stat-card stat-info">
-            <div className="stat-icon">
-              <Shield size={24} />
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">{rol.nombre}</span>
-              <span className="stat-value">{rol.cantidad}</span>
+          <div key={idx} className="col-12 col-sm-6 col-lg-3">
+            <div className="card border-info hover-lift">
+              <div className="card-body d-flex align-items-center gap-3">
+                <Shield size={32} className="text-info" />
+                <div>
+                  <div className="h4 mb-0 fw-bold text-info">{rol.cantidad}</div>
+                  <small className="text-muted">{rol.nombre}</small>
+                </div>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filtros y búsqueda */}
-      <div className="filtros-section">
-        <div className="busqueda-box">
-          <Search size={20} />
-          <input
-            type="text"
-            placeholder="Buscar por usuario o nombre..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
+      <div className="card mb-4">
+        <div className="card-header bg-light">
+          <h5 className="mb-0 d-flex align-items-center gap-2">
+            <Filter size={20} />
+            Filtros y Búsqueda
+          </h5>
         </div>
-
-        <div className="filtro-group">
-          <Filter size={16} />
-          <select value={filtroRol} onChange={(e) => setFiltroRol(e.target.value)}>
-            <option value="todos">Todos los roles</option>
-            {roles.map(rol => (
-              <option key={rol.id} value={rol.id}>{rol.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filtro-group">
-          <Filter size={16} />
-          <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
-            <option value="todos">Todos los estados</option>
-            <option value="activo">Activos</option>
-            <option value="inactivo">Inactivos</option>
-          </select>
+        <div className="card-body">
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">Buscar</label>
+              <div className="input-group">
+                <span className="input-group-text bg-white">
+                  <Search size={20} className="text-muted" />
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Buscar por usuario o nombre..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <Filter size={16} />
+                Rol
+              </label>
+              <select className="form-select" value={filtroRol} onChange={(e) => setFiltroRol(e.target.value)}>
+                <option value="todos">Todos los roles</option>
+                {roles.map(rol => (
+                  <option key={rol.id} value={rol.id}>{rol.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <Filter size={16} />
+                Estado
+              </label>
+              <select className="form-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+                <option value="todos">Todos los estados</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Tabla de usuarios */}
-      <div className="usuarios-tabla-container">
-        <table className="usuarios-tabla">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Nombre Completo</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Fecha Creación</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuariosFiltrados.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="no-data">
-                  No se encontraron usuarios
-                </td>
-              </tr>
-            ) : (
-              usuariosFiltrados.map(usuario => (
-                <tr key={usuario.id} className={!usuario.activo ? 'row-inactivo' : ''}>
-                  <td className="usuario-username">
-                    <strong>{usuario.username}</strong>
-                  </td>
-                  <td>{usuario.nombre_completo}</td>
-                  <td>
-                    <span className={`badge ${getRolBadgeClass(usuario.roles?.name)}`}>
-                      {usuario.roles?.name || 'Sin rol'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`estado-badge ${usuario.activo ? 'estado-activo' : 'estado-inactivo'}`}>
-                      {usuario.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td>
-                    {new Date(usuario.created_at).toLocaleDateString('es-MX', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </td>
-                  <td className="acciones-cell">
-                    <button
-                      className="btn-accion btn-editar"
-                      onClick={() => handleEditarUsuario(usuario)}
-                      title="Editar usuario"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      className="btn-accion btn-password"
-                      onClick={() => handleCambiarPassword(usuario)}
-                      title="Cambiar contraseña"
-                    >
-                      <Key size={16} />
-                    </button>
-                    <button
-                      className={`btn-accion ${usuario.activo ? 'btn-desactivar' : 'btn-activar'}`}
-                      onClick={() => handleToggleEstado(usuario)}
-                      title={usuario.activo ? 'Desactivar' : 'Activar'}
-                    >
-                      <Power size={16} />
-                    </button>
-                  </td>
+      <div className="card">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover table-striped align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Usuario</th>
+                  <th>Nombre Completo</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th>Fecha Creación</th>
+                  <th className="text-center">Acciones</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {usuariosFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-5 text-muted">
+                      No se encontraron usuarios
+                    </td>
+                  </tr>
+                ) : (
+                  usuariosFiltrados.map(usuario => (
+                    <tr key={usuario.id} className={!usuario.activo ? 'opacity-50' : ''}>
+                      <td className="fw-semibold">{usuario.username}</td>
+                      <td>{usuario.nombre_completo}</td>
+                      <td>
+                        <span className={`badge ${getRolBadgeClass(usuario.roles?.name)}`}>
+                          {usuario.roles?.name || 'Sin rol'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${usuario.activo ? 'bg-success' : 'bg-secondary'}`}>
+                          {usuario.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td>
+                        {new Date(usuario.created_at).toLocaleDateString('es-MX', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </td>
+                      <td className="text-center">
+                        <div className="btn-group" role="group">
+                          <button
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => handleEditarUsuario(usuario)}
+                            title="Editar usuario"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-info"
+                            onClick={() => handleCambiarPassword(usuario)}
+                            title="Cambiar contraseña"
+                          >
+                            <Key size={16} />
+                          </button>
+                          <button
+                            className={`btn btn-sm ${usuario.activo ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                            onClick={() => handleToggleEstado(usuario)}
+                            title={usuario.activo ? 'Desactivar' : 'Activar'}
+                          >
+                            <Power size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {/* Modal de Edición */}

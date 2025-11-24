@@ -4,10 +4,12 @@ import './DashboardLayout.css';
 
 const DashboardLayout = () => {
   return (
-    <div className="dashboard-layout">
+    <div className="dashboard-layout d-flex">
       <Sidebar />
-      <main className="main-content">
-        <Outlet />
+      <main className="main-content flex-grow-1">
+        <div className="container-fluid py-4">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

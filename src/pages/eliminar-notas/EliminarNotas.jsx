@@ -135,138 +135,147 @@ const EliminarNotas = () => {
   const dataToShow = searchTerm.trim() !== "" ? searchResults : devoluciones;
 
   return (
-    <div className="eliminar-notas-container">
-      <div className="eliminar-notas-header">
-        <div>
-          <h1>Eliminar Notas</h1>
-          <p className="subtitle">Busca y elimina registros de devoluciones</p>
+    <div className="container-fluid py-4">
+      {/* Header */}
+      <div className="card border-danger mb-4 shadow-sm">
+        <div className="card-header bg-danger text-white">
+          <h1 className="h3 mb-0 fw-bold">Eliminar Notas</h1>
+          <p className="mb-0 opacity-75">Busca y elimina registros de devoluciones</p>
         </div>
       </div>
 
       {/* Buscador */}
-      <div className="busqueda-section">
-        <div className="busqueda-wrapper">
-          <Search className="busqueda-icon" size={20} />
-          <input
-            type="text"
-            className="busqueda-input"
-            placeholder="Buscar por nota, cliente, empresa, vendedor..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button className="busqueda-clear" onClick={limpiarBusqueda}>
-              <X size={18} />
-            </button>
-          )}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="input-group mb-2">
+            <span className="input-group-text bg-white">
+              <Search size={20} className="text-muted" />
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Buscar por nota, cliente, empresa, vendedor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button className="btn btn-outline-secondary" type="button" onClick={limpiarBusqueda}>
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          <small className="text-muted">
+            {searchLoading
+              ? '🔍 Buscando en el servidor...'
+              : '💡 La búsqueda se realiza automáticamente. Haz scroll para cargar más registros.'}
+          </small>
         </div>
-        <small className="busqueda-hint">
-          {searchLoading
-            ? '🔍 Buscando en el servidor...'
-            : '💡 La búsqueda se realiza automáticamente. Haz scroll para cargar más registros.'}
-        </small>
       </div>
 
       {/* Tabla */}
-      <div className="tabla-section">
-        {dataToShow.length === 0 && !loading && !searchLoading ? (
-          <div className="empty-state">
-            <p>No se encontraron registros</p>
-          </div>
-        ) : (
-          <>
-            <div className="tabla-wrapper">
-              <table className="tabla-eliminar">
-                <thead>
-                  <tr>
-                    <th>Nota</th>
-                    <th>Fecha</th>
-                    <th>Cliente</th>
-                    <th>Empresa</th>
-                    <th>Vendedor</th>
-                    <th>Estado</th>
-                    <th>Proceso en</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dataToShow.map((dev) => (
-                    <tr key={dev.id}>
-                      <td className="nota-cell">{dev.numero_nota || '-'}</td>
-                      <td>{dev.fecha_nota ? new Date(dev.fecha_nota).toLocaleDateString() : '-'}</td>
-                      <td className="cliente-cell">{dev.cliente_nombre || '-'}</td>
-                      <td>
-                        <span className={`badge badge-${dev.empresa?.toLowerCase()}`}>
-                          {dev.empresa || '-'}
-                        </span>
-                      </td>
-                      <td>{dev.vendedor_nombre || '-'}</td>
-                      <td>
-                        <span className={`badge badge-estado badge-${dev.estado_actual}`}>
-                          {dev.estado_actual?.replace(/_/g, ' ') || '-'}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge badge-proceso badge-${dev.proceso_en}`}>
-                          {dev.proceso_en || '-'}
-                        </span>
-                      </td>
-                      <td>
-                        {deleteConfirm === dev.id ? (
-                          <div className="confirm-delete">
-                            <button
-                              className="btn-confirm-yes"
-                              onClick={() => handleDelete(dev.id)}
-                            >
-                              Sí
-                            </button>
-                            <button
-                              className="btn-confirm-no"
-                              onClick={() => setDeleteConfirm(null)}
-                            >
-                              No
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            className="btn-delete"
-                            onClick={() => setDeleteConfirm(dev.id)}
-                            title="Eliminar registro"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="card">
+        <div className="card-body p-0">
+          {dataToShow.length === 0 && !loading && !searchLoading ? (
+            <div className="text-center py-5">
+              <p className="text-muted">No se encontraron registros</p>
             </div>
-
-            {/* Observer target para infinite scroll */}
-            <div ref={observerTarget} className="scroll-observer"></div>
-
-            {/* Loading indicator cuando carga más datos */}
-            {(loading || searchLoading) && dataToShow.length > 0 && (
-              <div className="loading-more">
-                <div className="spinner-small"></div>
-                <p>Cargando más registros...</p>
+          ) : (
+            <>
+              <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+                <table className="table table-hover table-striped align-middle mb-0">
+                  <thead className="table-light sticky-top">
+                    <tr>
+                      <th>Nota</th>
+                      <th>Fecha</th>
+                      <th>Cliente</th>
+                      <th>Empresa</th>
+                      <th>Vendedor</th>
+                      <th>Estado</th>
+                      <th>Proceso en</th>
+                      <th className="text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataToShow.map((dev) => (
+                      <tr key={dev.id}>
+                        <td className="fw-semibold">{dev.numero_nota || '-'}</td>
+                        <td>{dev.fecha_devolucion ? new Date(dev.fecha_devolucion).toLocaleDateString() : '-'}</td>
+                        <td>{dev.cliente || '-'}</td>
+                        <td>
+                          <span className="badge bg-secondary">
+                            {dev.empresa || '-'}
+                          </span>
+                        </td>
+                        <td>{dev.vendedor_nombre || '-'}</td>
+                        <td>
+                          <span className={`badge-estado badge bg-info`}>
+                            {dev.estado_actual?.replace(/_/g, ' ') || '-'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-secondary">
+                            {dev.proceso_en || '-'}
+                          </span>
+                        </td>
+                        <td className="text-center">
+                          {deleteConfirm === dev.id ? (
+                            <div className="btn-group" role="group">
+                              <button
+                                className="btn btn-sm btn-success"
+                                onClick={() => handleDelete(dev.id)}
+                              >
+                                Sí
+                              </button>
+                              <button
+                                className="btn btn-sm btn-secondary"
+                                onClick={() => setDeleteConfirm(null)}
+                              >
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => setDeleteConfirm(dev.id)}
+                              title="Eliminar registro"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
 
-            {/* Mensaje cuando no hay más datos */}
-            {!loading && !searchLoading && dataToShow.length > 0 &&
-             !(searchTerm.trim() !== "" ? searchHasMore : hasMore) && (
-              <div className="no-more-data">
-                <p>No hay más registros para mostrar</p>
-              </div>
-            )}
-          </>
-        )}
+              {/* Observer target para infinite scroll */}
+              <div ref={observerTarget} style={{ height: '20px' }}></div>
+
+              {/* Loading indicator cuando carga más datos */}
+              {(loading || searchLoading) && dataToShow.length > 0 && (
+                <div className="card-footer text-center py-3">
+                  <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                  </div>
+                  <small className="text-muted">Cargando más registros...</small>
+                </div>
+              )}
+
+              {/* Mensaje cuando no hay más datos */}
+              {!loading && !searchLoading && dataToShow.length > 0 &&
+               !(searchTerm.trim() !== "" ? searchHasMore : hasMore) && (
+                <div className="card-footer text-center py-2">
+                  <small className="text-success">✓ No hay más registros para mostrar</small>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Mensaje de advertencia */}
-      <div className="warning-box">
+      <div className="alert alert-warning mt-4 d-flex align-items-center gap-2">
         <AlertTriangle size={20} />
         <div>
           <strong>Advertencia:</strong> La eliminación de registros es permanente y no se puede deshacer.

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Save, Lock, Eye, EyeOff } from 'lucide-react';
+import { Save, Lock, Eye, EyeOff } from 'lucide-react';
 import useUsuariosStore from '../../stores/usuariosStore';
 
 const CambiarPasswordModal = ({ usuario, onClose }) => {
@@ -55,97 +55,97 @@ const CambiarPasswordModal = ({ usuario, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content modal-small" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-title">
-            <Lock size={24} />
-            <div>
-              <h2>Cambiar Contraseña</h2>
-              <p className="modal-subtitle">Usuario: <strong>{usuario.username}</strong></p>
+    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={onClose} tabIndex="-1">
+      <div className="modal-dialog modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content">
+          <div className="modal-header bg-warning text-dark">
+            <div className="d-flex align-items-center gap-2">
+              <Lock size={24} />
+              <div>
+                <h2 className="modal-title mb-0 h4 fw-bold">Cambiar Contraseña</h2>
+                <p className="mb-0 small">Usuario: <strong>{usuario.username}</strong></p>
+              </div>
             </div>
+            <button className="btn-close" onClick={onClose} type="button"></button>
           </div>
-          <button className="modal-close" onClick={onClose}>
-            <X size={24} />
-          </button>
+
+          <form onSubmit={handleSubmit} className="modal-body">
+            {/* Nueva Contraseña */}
+            <div className="mb-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <Lock size={18} />
+                Nueva Contraseña *
+              </label>
+              <div className="input-group">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  placeholder="Ingrese la nueva contraseña"
+                  className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+            </div>
+
+            {/* Confirmar Contraseña */}
+            <div className="mb-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <Lock size={18} />
+                Confirmar Contraseña *
+              </label>
+              <div className="input-group">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                  placeholder="Confirme la nueva contraseña"
+                  className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
+            </div>
+
+            {/* Requisitos de contraseña */}
+            <div className="alert alert-info">
+              <p className="mb-2 fw-semibold">Requisitos:</p>
+              <ul className="mb-0 small">
+                <li className={formData.password.length >= 6 ? 'text-success' : ''}>
+                  {formData.password.length >= 6 ? '✓' : '○'} Mínimo 6 caracteres
+                </li>
+                <li className={formData.password === formData.confirmPassword && formData.password ? 'text-success' : ''}>
+                  {formData.password === formData.confirmPassword && formData.password ? '✓' : '○'} Las contraseñas coinciden
+                </li>
+              </ul>
+            </div>
+
+            {/* Footer */}
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn btn-warning d-flex align-items-center gap-2" disabled={loading}>
+                <Save size={18} />
+                {loading ? 'Guardando...' : 'Cambiar Contraseña'}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="modal-body">
-          {/* Nueva Contraseña */}
-          <div className="form-group">
-            <label>
-              <Lock size={18} />
-              Nueva Contraseña *
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                placeholder="Ingrese la nueva contraseña"
-                className={errors.password ? 'error' : ''}
-                autoFocus
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
-
-          {/* Confirmar Contraseña */}
-          <div className="form-group">
-            <label>
-              <Lock size={18} />
-              Confirmar Contraseña *
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                placeholder="Confirme la nueva contraseña"
-                className={errors.confirmPassword ? 'error' : ''}
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-          </div>
-
-          {/* Requisitos de contraseña */}
-          <div className="password-requirements">
-            <p><strong>Requisitos:</strong></p>
-            <ul>
-              <li className={formData.password.length >= 6 ? 'valid' : ''}>
-                Mínimo 6 caracteres
-              </li>
-              <li className={formData.password === formData.confirmPassword && formData.password ? 'valid' : ''}>
-                Las contraseñas coinciden
-              </li>
-            </ul>
-          </div>
-
-          {/* Botones */}
-          <div className="modal-footer">
-            <button type="button" className="btn-cancelar" onClick={onClose}>
-              Cancelar
-            </button>
-            <button type="submit" className="btn-guardar" disabled={loading}>
-              <Save size={18} />
-              {loading ? 'Guardando...' : 'Cambiar Contraseña'}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 // App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from './stores/authStore';
+import { SidebarProvider } from './contexts/SidebarContext';
 
 // Layout
 import DashboardLayout from './components/common/DashboardLayout';
@@ -53,19 +54,22 @@ function App() {
   const { user } = useAuthStore();
 
   return (
-    <Router>
-      <Routes>
+    <SidebarProvider>
+      <Router>
+        <Routes>
         {/* ========== RUTA DE LOGIN (PÚBLICA) ========== */}
         <Route 
           path="/login" 
           element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
         />
 
-        {/* ========== DASHBOARD (PÚBLICO) ========== */}
+        {/* ========== PÁGINA PRINCIPAL (PÚBLICA CON SIDEBAR) ========== */}
         <Route
           path="/dashboard"
-          element={<Dashboard />}
-        />
+          element={<DashboardLayout />}
+        >
+          <Route index element={<Dashboard />} />
+        </Route>
 
         {/* ========== RUTAS PROTEGIDAS (CON DASHBOARDLAYOUT) ========== */}
         <Route
@@ -179,6 +183,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </SidebarProvider>
   );
 }
 
