@@ -46,16 +46,91 @@
 }
 
 /* ========== MODO OSCURO ========== */
-[data-theme="dark"] .card .card-header.bg-light {
+[data-theme="dark"] .card {
   background-color: #1e293b !important;
-  border-bottom-color: #334155 !important;
+  border-color: #334155 !important;
   color: #f1f5f9;
+}
+
+[data-theme="dark"] .card .card-body {
+  background-color: #1e293b !important;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .card .card-header.bg-light {
+  background-color: #334155 !important;
+  border-bottom-color: #475569 !important;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .card .card-header.bg-primary {
+  background-color: #1e40af !important;
+}
+
+[data-theme="dark"] .card .card-header.bg-success {
+  background-color: #065f46 !important;
+}
+
+[data-theme="dark"] .card .card-header.bg-info {
+  background-color: #0c4a6e !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: #475569 !important;
+  border-color: #60a5fa !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .form-label {
+  color: #cbd5e1 !important;
 }
 
 [data-theme="dark"] .border-success.bg-light,
 [data-theme="dark"] .border-primary.bg-light,
 [data-theme="dark"] .border-warning.bg-light {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
   color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-check {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .form-check-input {
+  background-color: #334155;
+  border-color: #475569;
+}
+
+[data-theme="dark"] .form-check-input:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .text-primary {
+  color: #60a5fa !important;
+}
+
+[data-theme="dark"] .text-success {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .text-warning {
+  color: #fbbf24 !important;
 }

@@ -304,6 +304,57 @@
   }
 }
 
+/* ========== MODO CLARO ========== */
+/* Asegurar que la tabla tenga fondo blanco en modo claro */
+.tabla-scroll .table {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+.tabla-scroll .table thead {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.tabla-scroll .table thead th {
+  background-color: #f9fafb;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+.tabla-scroll .table tbody tr {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+.tabla-scroll .table tbody tr td {
+  background-color: #ffffff;
+  color: #1f2937;
+  border-color: #e5e7eb;
+}
+
+.tabla-scroll .table tbody tr:hover {
+  background-color: #f9fafb !important;
+}
+
+/* Asegurar que el contenido de las celdas sea visible */
+.tabla-scroll .table tbody tr td .td-content {
+  color: #1f2937;
+}
+
+/* Estados en modo claro */
+.tabla-scroll .table tbody tr.estado-autorizada {
+  background-color: rgba(16, 185, 129, 0.05) !important;
+}
+
+.tabla-scroll .table tbody tr.estado-rechazada {
+  background-color: #fef2f2 !important;
+}
+
+.tabla-scroll .table tbody tr.estado-registrada_pnv {
+  background-color: #f0fdf4 !important;
+}
+
 /* ========== MODO OSCURO ========== */
 [data-theme="dark"] .tabla-container {
   background: #1e293b;
