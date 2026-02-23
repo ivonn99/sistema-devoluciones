@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px 20px;
+    }
+    .info-box {
+      background-color: #f9fafb;
+      border-left: 4px solid #2563eb;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .info-label {
+      font-weight: bold;
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .info-value {
+      font-size: 16px;
+      color: #111827;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 2px;
+    }
+    .badge-almacen {
+      background-color: #3b82f6;
+      color: white;
+    }
+    .badge-credito {
+      background-color: #10b981;
+      color: white;
+    }
+    .badge-representante {
+      background-color: #f59e0b;
+      color: white;
+    }
+    .action-box {
+      background-color: #dbeafe;
+      border-left: 4px solid #2563eb;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .footer {
+      background-color: #f9fafb;
+      padding: 20px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📦 Nueva Devolución Pendiente</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">Sistema de Devoluciones</p>
+    </div>
+    
+    <div class="content">
+      <p style="font-size: 16px; margin-bottom: 20px;">
+        Se ha asignado una nueva devolución a <strong>{{proceso}}</strong> que requiere su atención.
+      </p>
+      
+      <div class="info-box">
+        <div class="info-label">Número de Nota</div>
+        <div class="info-value">{{numero_nota}}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">Cliente</div>
+        <div class="info-value">{{cliente}}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">Empresa</div>
+        <div class="info-value">{{empresa}}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">Fecha de Devolución</div>
+        <div class="info-value">{{fecha_devolucion}}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">Vendedor</div>
+        <div class="info-value">{{vendedor}}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">Motivo de Devolución</div>
+        <div class="info-value">{{motivo}}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">Estado Actual</div>
+        <div class="info-value">
+          <span class="badge badge-{{proceso}}">{{estado}}</span>
+        </div>
+      </div>
+      
+      <div class="action-box">
+        <p style="margin: 0; font-weight: bold; color: #1e40af;">
+          ⚠️ Acción requerida: Por favor, revise esta devolución en el sistema y tome las acciones correspondientes.
+        </p>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p style="margin: 0;">Este es un correo automático del Sistema de Devoluciones.</p>
+      <p style="margin: 5px 0 0 0;">No responda a este correo.</p>
+    </div>
+  </div>
+</body>
+</html>
+

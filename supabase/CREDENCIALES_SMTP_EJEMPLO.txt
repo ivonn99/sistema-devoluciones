@@ -1,0 +1,67 @@
+===========================================
+  CREDENCIALES SMTP - EJEMPLO DE CONFIGURACIÓN
+===========================================
+
+IMPORTANTE: Reemplaza estos valores con tus credenciales reales
+antes de agregarlos a Supabase.
+
+-------------------------------------------
+OPCIÓN 1: GMAIL (Recomendado para empezar)
+-------------------------------------------
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu-email@gmail.com
+SMTP_PASSWORD=abcd efgh ijkl mnop
+SMTP_FROM=tu-email@gmail.com
+SMTP_FROM_NAME=Sistema de Devoluciones
+
+NOTA: SMTP_PASSWORD debe ser una "Contraseña de Aplicación" de 16 caracteres
+      generada desde: https://myaccount.google.com/apppasswords
+
+-------------------------------------------
+OPCIÓN 2: OUTLOOK/OFFICE 365
+-------------------------------------------
+
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_USER=tu-email@outlook.com
+SMTP_PASSWORD=tu-contraseña-normal
+SMTP_FROM=tu-email@outlook.com
+SMTP_FROM_NAME=Sistema de Devoluciones
+
+-------------------------------------------
+OPCIÓN 3: SERVIDOR PROPIO
+-------------------------------------------
+
+SMTP_HOST=mail.tudominio.com
+SMTP_PORT=587
+SMTP_USER=notificaciones@tudominio.com
+SMTP_PASSWORD=tu-contraseña-del-servidor
+SMTP_FROM=notificaciones@tudominio.com
+SMTP_FROM_NAME=Sistema de Devoluciones
+
+===========================================
+  CÓMO AGREGAR EN SUPABASE
+===========================================
+
+1. Ir a: https://supabase.com/dashboard
+2. Seleccionar tu proyecto
+3. Settings → Edge Functions → Secrets
+4. Agregar cada variable una por una
+5. Verificar que todas estén guardadas
+
+===========================================
+  VERIFICACIÓN
+===========================================
+
+Después de configurar, deberías ver en Supabase:
+✅ SMTP_HOST
+✅ SMTP_PORT
+✅ SMTP_USER
+✅ SMTP_PASSWORD
+✅ SMTP_FROM
+✅ SMTP_FROM_NAME
+
+===========================================
+

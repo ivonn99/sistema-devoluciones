@@ -1,0 +1,100 @@
+===========================================
+  TUS CREDENCIALES SMTP PARA SUPABASE
+===========================================
+
+Copia y pega estas variables en Supabase Dashboard:
+Settings → Edge Functions → Secrets
+
+-------------------------------------------
+VARIABLE 1: SMTP_HOST
+-------------------------------------------
+smtp.gmail.com
+
+-------------------------------------------
+VARIABLE 2: SMTP_PORT
+-------------------------------------------
+587
+
+-------------------------------------------
+VARIABLE 3: SMTP_USER
+-------------------------------------------
+pedidosdmhn@gmail.com
+
+-------------------------------------------
+VARIABLE 4: SMTP_PASSWORD
+-------------------------------------------
+nxgrwloaygxtoobo
+
+(Nota: Sin espacios, la contraseña original era: nxgr wloa ygxt oobo)
+
+-------------------------------------------
+VARIABLE 5: SMTP_FROM
+-------------------------------------------
+pedidosdmhn@gmail.com
+
+-------------------------------------------
+VARIABLE 6: SMTP_FROM_NAME
+-------------------------------------------
+Sistema de Devoluciones
+
+===========================================
+  INSTRUCCIONES PASO A PASO
+===========================================
+
+1. Ir a: https://supabase.com/dashboard
+2. Seleccionar tu proyecto
+3. En el menú lateral: Settings (⚙️)
+4. Buscar "Edge Functions" en el menú
+5. Clic en "Secrets"
+6. Clic en "Add new secret"
+7. Agregar cada variable una por una:
+
+   Secret 1:
+   - Name: SMTP_HOST
+   - Value: smtp.gmail.com
+   
+   Secret 2:
+   - Name: SMTP_PORT
+   - Value: 587
+   
+   Secret 3:
+   - Name: SMTP_USER
+   - Value: pedidosdmhn@gmail.com
+   
+   Secret 4:
+   - Name: SMTP_PASSWORD
+   - Value: nxgrwloaygxtoobo
+   
+   Secret 5:
+   - Name: SMTP_FROM
+   - Value: pedidosdmhn@gmail.com
+   
+   Secret 6:
+   - Name: SMTP_FROM_NAME
+   - Value: Sistema de Devoluciones
+
+8. Verificar que todas las 6 variables estén guardadas
+
+===========================================
+  VERIFICACIÓN
+===========================================
+
+Después de agregar todas, deberías ver:
+✅ SMTP_HOST
+✅ SMTP_PORT
+✅ SMTP_USER
+✅ SMTP_PASSWORD
+✅ SMTP_FROM
+✅ SMTP_FROM_NAME
+
+===========================================
+  IMPORTANTE
+===========================================
+
+- La contraseña NO debe tener espacios
+- La contraseña es: nxgrwloaygxtoobo (16 caracteres)
+- No compartas este archivo con nadie
+- Guarda este archivo en un lugar seguro
+
+===========================================
+

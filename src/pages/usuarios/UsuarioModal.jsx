@@ -9,6 +9,7 @@ const UsuarioModal = ({ usuario, roles, onClose }) => {
     username: '',
     password: '',
     nombre_completo: '',
+    email: '',
     rol_id: '',
     activo: true
   });
@@ -22,6 +23,7 @@ const UsuarioModal = ({ usuario, roles, onClose }) => {
         username: usuario.username || '',
         password: '',
         nombre_completo: usuario.nombre_completo || '',
+        email: usuario.email || '',
         rol_id: usuario.rol_id || '',
         activo: usuario.activo !== undefined ? usuario.activo : true
       });
@@ -41,6 +43,14 @@ const UsuarioModal = ({ usuario, roles, onClose }) => {
     // Validar nombre completo
     if (!formData.nombre_completo.trim()) {
       newErrors.nombre_completo = 'El nombre completo es requerido';
+    }
+
+    // Validar email (opcional pero recomendado para notificaciones)
+    if (formData.email && formData.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = 'El formato del correo electrónico no es válido';
+      }
     }
 
     // Validar rol
@@ -71,6 +81,7 @@ const UsuarioModal = ({ usuario, roles, onClose }) => {
     const dataToSend = {
       username: formData.username.trim(),
       nombre_completo: formData.nombre_completo.trim(),
+      email: formData.email.trim() || null, // Permitir null si está vacío
       rol_id: parseInt(formData.rol_id),
       activo: formData.activo
     };
@@ -144,6 +155,29 @@ const UsuarioModal = ({ usuario, roles, onClose }) => {
                 className={`form-control ${errors.nombre_completo ? 'is-invalid' : ''}`}
               />
               {errors.nombre_completo && <div className="invalid-feedback">{errors.nombre_completo}</div>}
+            </div>
+
+            {/* Email */}
+            <div className="mb-3">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                Correo Electrónico
+                <span className="badge bg-info ms-2">Para notificaciones</span>
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="usuario@ejemplo.com (opcional)"
+                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+              />
+              {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+              <small className="form-text text-muted">
+                Se usará para enviar notificaciones por correo cuando haya cambios en las devoluciones
+              </small>
             </div>
 
             {/* Rol */}

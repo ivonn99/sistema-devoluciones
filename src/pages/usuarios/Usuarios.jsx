@@ -260,6 +260,7 @@ const Usuarios = () => {
                 <tr>
                   <th>Usuario</th>
                   <th>Nombre Completo</th>
+                  <th>Correo</th>
                   <th>Rol</th>
                   <th>Estado</th>
                   <th>Fecha Creación</th>
@@ -269,7 +270,7 @@ const Usuarios = () => {
               <tbody>
                 {usuariosFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-5 text-muted">
+                    <td colSpan="7" className="text-center py-5 text-muted">
                       No se encontraron usuarios
                     </td>
                   </tr>
@@ -278,6 +279,19 @@ const Usuarios = () => {
                     <tr key={usuario.id} className={!usuario.activo ? 'opacity-50' : ''}>
                       <td className="fw-semibold">{usuario.username}</td>
                       <td>{usuario.nombre_completo}</td>
+                      <td>
+                        {usuario.email ? (
+                          <span className="d-flex align-items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                              <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <small>{usuario.email}</small>
+                          </span>
+                        ) : (
+                          <span className="text-muted small">Sin correo</span>
+                        )}
+                      </td>
                       <td>
                         <span className={`badge ${getRolBadgeClass(usuario.roles?.name)}`}>
                           {usuario.roles?.name || 'Sin rol'}

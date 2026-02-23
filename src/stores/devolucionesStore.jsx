@@ -1,6 +1,7 @@
 // stores/devolucionesStore.jsx
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
+import { enviarNotificacionEmail } from '../utils/emailServiceSimple';
 
 // 🔧 Helper para parsear errores de Supabase de forma robusta
 const parseSupabaseError = (error) => {
@@ -571,6 +572,33 @@ const useDevolucionesStore = create((set, get) => ({
         loading: false,
       }));
 
+      // 🚀 ENVIAR CORREO DE FORMA ASÍNCRONA (registro inicial)
+      // Notificar cuando se registra una nueva devolución
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📧 [NUEVA DEVOLUCIÓN] Iniciando envío de notificación por correo');
+      console.log('📦 Devolución creada exitosamente');
+      console.log('🔄 Proceso inicial:', procesoInicial);
+      console.log('📝 Nota:', devolucionConDiasTranscurridos.numero_nota);
+      console.log('👤 Cliente:', devolucionConDiasTranscurridos.cliente);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      enviarNotificacionEmail(
+        devolucionConDiasTranscurridos,
+        procesoInicial,
+        null // No hay proceso anterior en registro inicial
+      ).then(resultado => {
+        console.log('✅ [NUEVA DEVOLUCIÓN] Resultado del envío de correo:', resultado);
+        if (resultado.success) {
+          console.log(`📧 [NUEVA DEVOLUCIÓN] Correos enviados: ${resultado.enviados || 0}/${resultado.total || 0}`);
+        } else {
+          console.warn('⚠️ [NUEVA DEVOLUCIÓN] El correo no se pudo enviar:', resultado.error);
+        }
+      }).catch(error => {
+        // Solo loguear el error, no lanzarlo
+        console.error('❌ [NUEVA DEVOLUCIÓN] Error al enviar correo (no crítico):', error);
+        console.error('📋 Detalles del error:', JSON.stringify(error, null, 2));
+      });
+
       return { 
         success: true, 
         data: devolucionConDiasTranscurridos,
@@ -736,6 +764,33 @@ const useDevolucionesStore = create((set, get) => ({
         ),
         loading: false,
       }));
+
+      // 🚀 ENVIAR CORREO DE FORMA ASÍNCRONA (no bloquea la actualización)
+      // Si el correo falla, no afecta el éxito de la actualización
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📧 [ACTUALIZACIÓN ESTADO] Iniciando envío de notificación por correo');
+      console.log('📦 Devolución ID:', id);
+      console.log('🔄 Proceso anterior:', devolucionActual?.proceso_en);
+      console.log('🔄 Proceso nuevo:', nuevoProceso);
+      console.log('📊 Estado nuevo:', nuevoEstado);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      enviarNotificacionEmail(
+        devolucionConDiasTranscurridos,
+        nuevoProceso,
+        devolucionActual?.proceso_en
+      ).then(resultado => {
+        console.log('✅ [ACTUALIZACIÓN ESTADO] Resultado del envío de correo:', resultado);
+        if (resultado.success) {
+          console.log(`📧 [ACTUALIZACIÓN ESTADO] Correos enviados: ${resultado.enviados || 0}/${resultado.total || 0}`);
+        } else {
+          console.warn('⚠️ [ACTUALIZACIÓN ESTADO] El correo no se pudo enviar:', resultado.error);
+        }
+      }).catch(error => {
+        // Solo loguear el error, no lanzarlo
+        console.error('❌ [ACTUALIZACIÓN ESTADO] Error al enviar correo (no crítico):', error);
+        console.error('📋 Detalles del error:', JSON.stringify(error, null, 2));
+      });
 
       return { success: true, data: devolucionConDiasTranscurridos };
     } catch (error) {
