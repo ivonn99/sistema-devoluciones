@@ -65,3 +65,5 @@ Después de configurar, deberías ver en Supabase:
 
 ===========================================
 
+
+

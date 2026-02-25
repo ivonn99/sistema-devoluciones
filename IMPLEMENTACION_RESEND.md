@@ -176,3 +176,5 @@ Si prefieres Resend, puedo:
 
 ¿Prefieres Resend o mantener Supabase?
 
+
+

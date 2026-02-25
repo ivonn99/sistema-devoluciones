@@ -127,3 +127,5 @@ Asegúrate de que los usuarios en la tabla `usuarios` tengan:
 - Nunca expongas las credenciales en el código del frontend
 - Usa "App Passwords" cuando sea posible (Gmail, Outlook)
 
+
+

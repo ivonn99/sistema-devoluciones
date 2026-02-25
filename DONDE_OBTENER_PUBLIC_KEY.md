@@ -123,3 +123,5 @@ Puedes:
 
 ¿Quieres que te guíe paso a paso con capturas de pantalla o prefieres que configuremos Supabase Edge Functions que ya está listo?
 
+
+

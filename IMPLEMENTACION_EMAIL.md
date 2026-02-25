@@ -125,3 +125,5 @@ El correo incluye:
 
 Ver `supabase/functions/README_EMAIL.md` para instrucciones detalladas de configuración.
 
+
+

@@ -160,3 +160,5 @@ Si prefieres usar variables de entorno (más seguro), crea el archivo `.env` y u
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 ```
 
+
+

@@ -116,3 +116,5 @@ Si EmailJS sigue dando problemas, puedes volver a usar Supabase Edge Functions q
 
 ¿Quieres que te guíe paso a paso para reconectar Gmail o prefieres usar Custom SMTP?
 
+
+

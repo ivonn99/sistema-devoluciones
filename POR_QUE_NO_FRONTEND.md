@@ -143,3 +143,5 @@ Si realmente necesitas hacerlo desde el frontend, puedo ayudarte a:
 
 Pero te recomiendo **mantener Supabase Edge Functions** porque es la solución más segura y profesional.
 
+
+

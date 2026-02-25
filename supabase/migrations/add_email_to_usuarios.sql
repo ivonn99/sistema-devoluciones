@@ -11,3 +11,5 @@ CREATE INDEX IF NOT EXISTS idx_usuarios_email ON public.usuarios(email) WHERE em
 -- Agregar comentario a la columna para documentación
 COMMENT ON COLUMN public.usuarios.email IS 'Correo electrónico del usuario para notificaciones del sistema';
 
+
+

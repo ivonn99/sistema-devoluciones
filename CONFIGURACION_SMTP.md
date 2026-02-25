@@ -236,3 +236,5 @@ Si tienes problemas:
 2. Verifica que todas las variables estén correctamente escritas (sin espacios extra)
 3. Prueba las credenciales con un cliente de correo externo (Thunderbird, Outlook) para verificar que funcionen
 
+
+
