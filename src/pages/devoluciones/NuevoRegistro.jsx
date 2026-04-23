@@ -610,6 +610,7 @@ const NuevoRegistro = () => {
                         min="1"
                         value={producto.cantidad}
                         onChange={(e) => handleProductChange(index, 'cantidad', e.target.value)}
+                        onWheel={(e) => e.target.blur()}
                         required
                         className="form-control"
                       />

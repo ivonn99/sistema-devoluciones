@@ -701,6 +701,7 @@ const ModalCorreccion = ({
                         min="1"
                         value={producto.cantidad}
                         onChange={(e) => onEditarProducto(index, 'cantidad', parseInt(e.target.value) || 1)}
+                        onWheel={(e) => e.target.blur()}
                         className="form-control"
                       />
                     </div>
