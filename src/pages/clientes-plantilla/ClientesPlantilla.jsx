@@ -222,27 +222,13 @@ const ClientesPlantilla = () => {
     const a = document.createElement('a');
     a.href = url;
     a.download = 'plantilla_clientes.csv';
-    a.style.display = 'none';
-    
-    // Agregar al DOM temporalmente
-    document.body.appendChild(a);
-    
-    // Hacer click y limpiar de forma segura
+
+    // Disparar descarga sin insertar/eliminar nodos del DOM
     try {
       a.click();
     } finally {
-      // Usar setTimeout para asegurar que el click se procese antes de remover
-      setTimeout(() => {
-        try {
-          if (a.parentNode === document.body) {
-            document.body.removeChild(a);
-          }
-        } catch (e) {
-          // Si falla la remoción, no es crítico, el elemento se limpiará automáticamente
-          console.warn('No se pudo remover el elemento temporal:', e);
-        }
-        window.URL.revokeObjectURL(url);
-      }, 100);
+      // Liberar el objeto URL para evitar fugas de memoria
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
     }
   };
 

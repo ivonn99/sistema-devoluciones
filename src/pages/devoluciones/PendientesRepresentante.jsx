@@ -809,7 +809,7 @@ const DevolucionCard = ({
           </div>
           <div className="d-flex flex-column gap-2">
             {devolucion.devoluciones_detalle?.map((prod, idx) => (
-              <div key={idx} className="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+              <div key={`${prod.concepto_sustancia || 'producto'}-${prod.cantidad || 0}-${idx}`} className="d-flex justify-content-between align-items-center p-3 bg-light rounded">
                 <div>
                   <div className="fw-medium">{prod.concepto_sustancia}</div>
                   <small className="text-muted">Estado: {prod.estado_producto}</small>
