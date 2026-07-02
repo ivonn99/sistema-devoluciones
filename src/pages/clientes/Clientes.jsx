@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
 import useClientesStore from '../../stores/clientesStore';
@@ -9,8 +9,11 @@ import {
   PlusCircle,
   X,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  CaseSensitive,
+  Files
 } from 'lucide-react';
+import { estandarizarMayusculas } from '../../utils/textUtils';
 import './Clientes.css';
 
 const Clientes = () => {
@@ -27,7 +30,9 @@ const Clientes = () => {
     loadMoreClientes,
     createCliente,
     deleteCliente,
-    deleteAllClientes
+    deleteAllClientes,
+    normalizarClientesMayusculas,
+    eliminarDuplicadosClientes
   } = useClientesStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,6 +42,9 @@ const Clientes = () => {
     nombre: '',
     ruta_reparto: ''
   });
+
+  const scrollContainerRef = useRef(null);
+  const observerTarget = useRef(null);
 
   // Cargar clientes iniciales
   useEffect(() => {
@@ -62,28 +70,26 @@ const Clientes = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
-  // Infinite scroll
+  // Infinite scroll con IntersectionObserver
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollContainer = document.querySelector('.clientes-tabla-container');
-      if (!scrollContainer) return;
+    if (!hasMore || loading || loadingMore) return;
 
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+    const root = scrollContainerRef.current;
+    const target = observerTarget.current;
+    if (!root || !target) return;
 
-      // Si estamos cerca del final (100px antes)
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        if (!loadingMore && hasMore) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
           loadMoreClientes(searchTerm);
         }
-      }
-    };
+      },
+      { root, threshold: 0.1, rootMargin: '100px' }
+    );
 
-    const scrollContainer = document.querySelector('.clientes-tabla-container');
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScroll);
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
-    }
-  }, [loadingMore, hasMore, searchTerm, loadMoreClientes]);
+    observer.observe(target);
+    return () => observer.unobserve(target);
+  }, [hasMore, loading, loadingMore, searchTerm, loadMoreClientes, clientes.length]);
 
   const abrirModal = () => {
     setNuevoCliente({ nombre: '', ruta_reparto: '' });
@@ -100,6 +106,14 @@ const Clientes = () => {
     setNuevoCliente(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    setNuevoCliente(prev => ({
+      ...prev,
+      [name]: estandarizarMayusculas(value)
     }));
   };
 
@@ -157,7 +171,7 @@ const Clientes = () => {
     try {
       const clienteData = {
         nombre: nuevoCliente.nombre.trim(),
-        ruta_reparto: nuevoCliente.ruta_reparto.trim() || null
+        ruta_reparto: nuevoCliente.ruta_reparto.trim() || ''
       };
 
       const resultado = await createCliente(clienteData);
@@ -252,6 +266,151 @@ const Clientes = () => {
           confirmButtonColor: '#ef4444'
         });
       }
+    }
+  };
+
+  const handleEliminarDuplicados = async () => {
+    const result = await Swal.fire({
+      title: 'Eliminar duplicados',
+      html: `
+        <p class="mb-3">Selecciona qué consideramos <strong>duplicado</strong>:</p>
+        <div style="text-align: left;">
+          <label class="d-flex align-items-start gap-2 mb-3 p-2 border rounded" style="cursor: pointer;">
+            <input type="radio" name="criterio-duplicado" value="nombre_ruta" checked class="mt-1" />
+            <span>
+              <strong>Mismo nombre + misma ruta</strong><br/>
+              <small class="text-muted">Elimina registros idénticos. Conserva homónimos con rutas distintas.</small>
+            </span>
+          </label>
+          <label class="d-flex align-items-start gap-2 p-2 border rounded" style="cursor: pointer;">
+            <input type="radio" name="criterio-duplicado" value="nombre" class="mt-1" />
+            <span>
+              <strong>Solo mismo nombre</strong><br/>
+              <small class="text-muted">Fusiona todos los registros con el mismo nombre en uno solo (conserva el ID más bajo).</small>
+            </span>
+          </label>
+        </div>
+        <p style="color: #dc3545; font-weight: bold; margin-top: 1rem; margin-bottom: 0;">Esta operación no se puede deshacer.</p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      focusConfirm: false,
+      preConfirm: () => {
+        const selected = document.querySelector('input[name="criterio-duplicado"]:checked');
+        if (!selected) {
+          Swal.showValidationMessage('Selecciona un criterio de duplicado');
+          return false;
+        }
+        return selected.value;
+      }
+    });
+
+    if (!result.isConfirmed || !result.value) return;
+
+    const criterio = result.value;
+    const criterioLabel = criterio === 'nombre'
+      ? 'solo mismo nombre'
+      : 'mismo nombre + misma ruta';
+
+    Swal.fire({
+      title: 'Eliminando duplicados...',
+      html: `Criterio: <strong>${criterioLabel}</strong><br/>Por favor espera`,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const eliminarResult = await eliminarDuplicadosClientes(criterio);
+
+    if (eliminarResult.success) {
+      const stats = eliminarResult.stats || {};
+      await Swal.fire({
+        icon: 'success',
+        title: 'Duplicados eliminados',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Criterio aplicado:</strong> ${criterioLabel}</p>
+            <p><strong>Grupos procesados:</strong> ${stats.grupos_procesados ?? 0}</p>
+            <p><strong>Registros eliminados:</strong> ${stats.duplicados_eliminados ?? 0}</p>
+          </div>
+        `,
+        confirmButtonColor: '#10b981'
+      });
+      await searchClientes(searchTerm, true);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: eliminarResult.error || 'No se pudieron eliminar los duplicados',
+        confirmButtonColor: '#ef4444'
+      });
+    }
+  };
+
+  const handleNormalizarMayusculas = async () => {
+    const result = await Swal.fire({
+      title: 'Estandarizar mayúsculas',
+      html: `
+        <p>Esta acción normalizará <strong>todos</strong> los clientes existentes a MAYÚSCULAS.</p>
+        <ul style="text-align: left; margin: 1rem 0;">
+          <li>Fusionará duplicados con el mismo nombre y la misma ruta</li>
+          <li>No fusionará homónimos que compartan nombre pero tengan rutas distintas</li>
+          <li>Actualizará también los nombres de cliente en devoluciones</li>
+        </ul>
+        <p style="color: #dc3545; font-weight: bold;">Esta operación no se puede deshacer.</p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: 'Estandarizando registros...',
+      html: 'Por favor espera',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const normalizarResult = await normalizarClientesMayusculas();
+
+    if (normalizarResult.success) {
+      const stats = normalizarResult.stats || {};
+      await Swal.fire({
+        icon: 'success',
+        title: 'Registros estandarizados',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Clientes actualizados:</strong> ${stats.actualizados_clientes ?? 0}</p>
+            <p><strong>Devoluciones actualizadas:</strong> ${stats.actualizados_devoluciones ?? 0}</p>
+            <p><strong>Duplicados fusionados:</strong> ${stats.duplicados_eliminados ?? 0}</p>
+          </div>
+        `,
+        confirmButtonColor: '#10b981'
+      });
+      await searchClientes(searchTerm, true);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: normalizarResult.error || 'No se pudo normalizar los registros',
+        confirmButtonColor: '#ef4444'
+      });
     }
   };
 
@@ -377,14 +536,32 @@ const Clientes = () => {
                 Nuevo Cliente
               </button>
               {isAdmin && (
-                <button
-                  onClick={handleDeleteAllClientes}
-                  className="btn btn-danger d-flex align-items-center gap-2"
-                  title="Eliminar todos los clientes (Solo Admin)"
-                >
-                  <Trash2 size={20} />
-                  Eliminar Todos
-                </button>
+                <>
+                  <button
+                    onClick={handleEliminarDuplicados}
+                    className="btn btn-outline-warning d-flex align-items-center gap-2"
+                    title="Eliminar clientes duplicados (Solo Admin)"
+                  >
+                    <Files size={20} />
+                    Eliminar Duplicados
+                  </button>
+                  <button
+                    onClick={handleNormalizarMayusculas}
+                    className="btn btn-warning d-flex align-items-center gap-2"
+                    title="Estandarizar mayúsculas en todos los clientes (Solo Admin)"
+                  >
+                    <CaseSensitive size={20} />
+                    Estandarizar Mayúsculas
+                  </button>
+                  <button
+                    onClick={handleDeleteAllClientes}
+                    className="btn btn-danger d-flex align-items-center gap-2"
+                    title="Eliminar todos los clientes (Solo Admin)"
+                  >
+                    <Trash2 size={20} />
+                    Eliminar Todos
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -428,7 +605,11 @@ const Clientes = () => {
       ) : (
         <div className="card">
           <div className="card-body p-0">
-            <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+            <div
+              ref={scrollContainerRef}
+              className="table-responsive clientes-tabla-container"
+              style={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}
+            >
               <table className="table table-hover table-striped align-middle mb-0">
                 <thead className="table-light sticky-top">
                   <tr>
@@ -457,6 +638,7 @@ const Clientes = () => {
                   ))}
                 </tbody>
               </table>
+              <div ref={observerTarget} aria-hidden="true" style={{ height: 1 }} />
             </div>
             {/* Indicador de carga al hacer scroll */}
             {loadingMore && (
@@ -501,6 +683,7 @@ const Clientes = () => {
                       name="nombre"
                       value={nuevoCliente.nombre}
                       onChange={handleInputChange}
+                      onBlur={handleInputBlur}
                       placeholder="Ej: FARMACIA SAN JOSE"
                       className="form-control"
                       required
@@ -513,6 +696,7 @@ const Clientes = () => {
                       name="ruta_reparto"
                       value={nuevoCliente.ruta_reparto}
                       onChange={handleInputChange}
+                      onBlur={handleInputBlur}
                       placeholder="Ej: Ruta 1, Zona Norte"
                       className="form-control"
                     />

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const SidebarContext = createContext();
 
@@ -11,16 +11,34 @@ export const useSidebar = () => {
 };
 
 export const SidebarProvider = ({ children }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth <= 768
+  );
 
-  const toggleSidebar = () => {
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isCollapsed) {
+        setIsCollapsed(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isCollapsed]);
+
+  const toggleSidebar = useCallback(() => {
     setIsCollapsed(prev => !prev);
-  };
+  }, []);
+
+  const closeSidebar = useCallback(() => {
+    setIsCollapsed(true);
+  }, []);
 
   const value = {
     isCollapsed,
     setIsCollapsed,
     toggleSidebar,
+    closeSidebar,
   };
 
   return (

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Download } from 'lucide-react';
 import Swal from 'sweetalert2';
 import useClientesPlantillaStore from '../../stores/clientesPlantillaStore';
+import { claveCliente } from '../../utils/textUtils';
 import './ClientesPlantilla.css';
 
 const ClientesPlantilla = () => {
@@ -139,10 +140,10 @@ const ClientesPlantilla = () => {
         return;
       }
 
-      // Eliminar duplicados: mantener solo el último registro de cada nombre
+      // Eliminar duplicados: mantener solo el último registro de cada nombre + ruta
       const clientesUnicos = {};
       clientesData.forEach(cliente => {
-        clientesUnicos[cliente.nombre] = cliente;
+        clientesUnicos[claveCliente(cliente)] = cliente;
       });
       const clientesDataLimpio = Object.values(clientesUnicos);
 
@@ -152,7 +153,7 @@ const ClientesPlantilla = () => {
         await Swal.fire({
           icon: 'info',
           title: 'Duplicados detectados',
-          text: `Se encontraron ${duplicadosEncontrados} registro(s) duplicado(s) en el CSV. Se procesará solo el último registro de cada cliente.`,
+          text: `Se encontraron ${duplicadosEncontrados} registro(s) duplicado(s) en el CSV (mismo nombre y misma ruta). Se procesará solo el último de cada combinación.`,
           confirmButtonColor: '#3085d6'
         });
       }
@@ -216,7 +217,7 @@ const ClientesPlantilla = () => {
 
   // Descargar plantilla CSV de ejemplo
   const downloadTemplate = () => {
-    const csvContent = 'nombre;ruta_reparto\nCliente Ejemplo 1;Ruta A\nCliente Ejemplo 2;Ruta B\n"AIECSA, S.A. DE C.V";Ruta C';
+    const csvContent = 'nombre;ruta_reparto\nCliente Ejemplo 1;Ruta A\nJUAN PEREZ;Ruta Norte\nJUAN PEREZ;Ruta Sur\n"AIECSA, S.A. DE C.V";Ruta C';
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -369,14 +370,30 @@ const ClientesPlantilla = () => {
         </div>
       )}
 
+      {/* Aviso: homónimos */}
+      <div className="alert alert-info d-flex align-items-start gap-3 mb-4">
+        <AlertTriangle size={24} className="flex-shrink-0" />
+        <div>
+          <strong>Homónimos (mismo nombre, distinta ruta)</strong>
+          <p className="mb-0 mt-2">
+            Puedes cargar clientes con el <strong>mismo nombre</strong> siempre que tengan
+            una <strong>ruta de reparto distinta</strong>. El sistema los trata como registros
+            separados. Si repites la misma combinación nombre + ruta en el CSV, se actualizará
+            el registro existente.
+          </p>
+        </div>
+      </div>
+
       {/* Info Box */}
       <div className="alert alert-info d-flex align-items-start gap-3 mb-4">
         <AlertTriangle size={24} className="flex-shrink-0" />
         <div>
           <strong>Importante:</strong>
           <ul className="mb-0 mt-2">
-            <li>Si el cliente YA existe (mismo nombre), se actualizará su ruta de reparto</li>
-            <li>Si el cliente NO existe, se insertará como nuevo registro</li>
+            <li>Si el cliente YA existe (mismo nombre <strong>y</strong> misma ruta), se actualizará</li>
+            <li>Si la combinación nombre + ruta NO existe, se insertará como nuevo registro</li>
+            <li>Mismo nombre con rutas distintas se permite (homónimos)</li>
+            <li>Si en el CSV hay filas repetidas con el mismo nombre y ruta, solo se procesará la última</li>
             <li>El archivo debe tener las columnas: <code>nombre</code>, <code>ruta_reparto</code></li>
             <li>Soporta archivos CSV (separados por comas o punto y coma) y TSV (separados por tabuladores)</li>
           </ul>
@@ -406,12 +423,12 @@ const ClientesPlantilla = () => {
                   <td>Ruta A</td>
                 </tr>
                 <tr>
-                  <td>Cliente Ejemplo 2</td>
-                  <td>Ruta B</td>
+                  <td>JUAN PEREZ</td>
+                  <td>Ruta Norte</td>
                 </tr>
                 <tr>
-                  <td>Cliente Ejemplo 3</td>
-                  <td>Ruta C</td>
+                  <td>JUAN PEREZ</td>
+                  <td>Ruta Sur</td>
                 </tr>
               </tbody>
             </table>

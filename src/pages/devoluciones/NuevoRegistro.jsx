@@ -17,6 +17,7 @@ import {
   Trash2,
   Search
 } from 'lucide-react';
+import { formatClienteLabel } from '../../utils/textUtils';
 
 // 🎯 Importar solo los estilos específicos de este componente
 import './NuevoRegistro.css';
@@ -39,6 +40,7 @@ const NuevoRegistro = () => {
     fecha_remision: '',
     fecha_devolucion: '',
     cliente: '',
+    cliente_id: '',
     vendedor_nombre: '',
     tipo_cliente: 'local',
     tiene_registro_libreta: false,
@@ -102,6 +104,17 @@ const NuevoRegistro = () => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleClienteChange = (e) => {
+    const clienteId = e.target.value;
+    const cliente = clientes.find((c) => String(c.id) === clienteId);
+
+    setFormData(prev => ({
+      ...prev,
+      cliente_id: clienteId,
+      cliente: cliente ? formatClienteLabel(cliente) : ''
     }));
   };
 
@@ -333,7 +346,7 @@ const NuevoRegistro = () => {
                 />
               </div>
 
-              <div className={`col-md-6 ${formData.cliente ? 'border border-success rounded p-3 bg-light' : searchCliente && clientes.length > 0 ? 'border border-primary rounded p-3 bg-light' : searchCliente && clientes.length === 0 ? 'border border-warning rounded p-3 bg-light' : ''}`}>
+              <div className={`col-md-6 ${formData.cliente_id ? 'border border-success rounded p-3 bg-light' : searchCliente && clientes.length > 0 ? 'border border-primary rounded p-3 bg-light' : searchCliente && clientes.length === 0 ? 'border border-warning rounded p-3 bg-light' : ''}`}>
                 <label className="form-label fw-semibold d-flex align-items-center gap-2">
                   <Search size={16} className="text-primary" />
                   Cliente (búsqueda en servidor)
@@ -346,16 +359,16 @@ const NuevoRegistro = () => {
                   className="form-control mb-2"
                 />
                 <select
-                  name="cliente"
-                  value={formData.cliente}
-                  onChange={handleChange}
+                  name="cliente_id"
+                  value={formData.cliente_id}
+                  onChange={handleClienteChange}
                   required
-                  disabled={loadingClientes || (!searchCliente && !formData.cliente)}
-                  size={searchCliente && !formData.cliente ? Math.min(clientes.length + 1, 8) : 1}
+                  disabled={loadingClientes || (!searchCliente && !formData.cliente_id)}
+                  size={searchCliente && !formData.cliente_id ? Math.min(clientes.length + 1, 8) : 1}
                   className="form-select"
                   style={{ 
-                    height: searchCliente && !formData.cliente ? 'auto' : '40px',
-                    minHeight: searchCliente && !formData.cliente ? '80px' : '40px'
+                    height: searchCliente && !formData.cliente_id ? 'auto' : '40px',
+                    minHeight: searchCliente && !formData.cliente_id ? '80px' : '40px'
                   }}
                 >
                   <option value="">
@@ -365,13 +378,13 @@ const NuevoRegistro = () => {
                       ? '🔍 Buscando...'
                       : searchCliente 
                         ? clientes.length > 0 ? `${clientes.length} resultados` : 'Sin resultados'
-                        : formData.cliente
+                        : formData.cliente_id
                         ? 'Seleccionado ✓'
                         : '💡 Escribe arriba para buscar'}
                   </option>
                   {clientes.map((cliente) => (
-                    <option key={cliente.id} value={cliente.nombre}>
-                      {cliente.nombre}
+                    <option key={cliente.id} value={cliente.id}>
+                      {formatClienteLabel(cliente)}
                     </option>
                   ))}
                 </select>
@@ -383,9 +396,9 @@ const NuevoRegistro = () => {
                     ⚠️ No se encontraron resultados para "{searchCliente}"
                   </small>
                 )}
-                {formData.cliente && (
+                {formData.cliente_id && (
                   <small className="text-success d-block mt-1">
-                    ✓ Cliente seleccionado
+                    ✓ Cliente seleccionado: {formData.cliente}
                   </small>
                 )}
               </div>

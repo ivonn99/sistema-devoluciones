@@ -16,9 +16,10 @@ import {
   Moon,
   Sun
 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useEffect } from 'react';
 import useAuthStore from "../../stores/authStore";
 import useThemeStore from "../../stores/themeStore";
+import { useSidebar } from '../../contexts/SidebarContext';
 import './Sidebar.css';
 
 // 🎯 Configuración del menú por roles
@@ -128,7 +129,26 @@ const menuConfig = {
 const Sidebar = () => {
   const { user, signOut } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, toggleSidebar, closeSidebar } = useSidebar();
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isCollapsed) return;
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        closeSidebar();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isCollapsed, closeSidebar]);
+
+  const handleNavClick = () => {
+    if (window.innerWidth <= 768) {
+      closeSidebar();
+    }
+  };
 
   // 🎯 Obtener opciones de menú según el rol del usuario
   const getMenuItems = () => {
@@ -146,7 +166,7 @@ const Sidebar = () => {
   const menuItems = getMenuItems();
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside ref={sidebarRef} className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       {/* Header */}
       <div className="sidebar-header">
         {!isCollapsed && (
@@ -159,7 +179,7 @@ const Sidebar = () => {
           </div>
         )}
         <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={toggleSidebar}
           className="collapse-btn"
           title={isCollapsed ? 'Expandir' : 'Colapsar'}
         >
@@ -190,6 +210,7 @@ const Sidebar = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={handleNavClick}
               className={({ isActive }) => 
                 `nav-item ${isActive ? 'active' : ''}`
               }

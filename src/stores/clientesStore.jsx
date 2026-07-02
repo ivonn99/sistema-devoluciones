@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
+import { normalizarCliente } from '../utils/textUtils';
 
 const useClientesStore = create((set) => ({
   clientes: [],
@@ -17,7 +18,8 @@ const useClientesStore = create((set) => ({
       const { data, error } = await supabase
         .from('clientes')
         .select('*')
-        .order('nombre', { ascending: true });
+        .order('nombre', { ascending: true })
+        .order('ruta_reparto', { ascending: true });
 
       if (error) {
         console.error('❌ [clientesStore] Error de Supabase:', error);
@@ -52,6 +54,7 @@ const useClientesStore = create((set) => ({
         .from('clientes')
         .select('*', { count: 'exact' })
         .order('nombre', { ascending: true })
+        .order('ruta_reparto', { ascending: true })
         .range(offset, offset + pageSize - 1);
 
       // Aplicar filtro si hay búsqueda
@@ -96,7 +99,7 @@ const useClientesStore = create((set) => ({
     try {
       const { data, error } = await supabase
         .from('clientes')
-        .insert([clienteData])
+        .insert([normalizarCliente(clienteData)])
         .select()
         .single();
       
@@ -132,6 +135,42 @@ const useClientesStore = create((set) => ({
 
       return { success: true };
     } catch (error) {
+      set({ error: error.message, loading: false });
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Normalizar mayúsculas en registros históricos (solo admin)
+  normalizarClientesMayusculas: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { data, error } = await supabase.rpc('normalizar_clientes_mayusculas');
+
+      if (error) throw error;
+
+      set({ loading: false });
+      return { success: true, stats: data };
+    } catch (error) {
+      console.error('Error al normalizar clientes:', error);
+      set({ error: error.message, loading: false });
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Eliminar duplicados según criterio (solo admin)
+  eliminarDuplicadosClientes: async (criterio) => {
+    set({ loading: true, error: null });
+    try {
+      const { data, error } = await supabase.rpc('eliminar_duplicados_clientes', {
+        criterio
+      });
+
+      if (error) throw error;
+
+      set({ loading: false });
+      return { success: true, stats: data };
+    } catch (error) {
+      console.error('Error al eliminar duplicados:', error);
       set({ error: error.message, loading: false });
       return { success: false, error: error.message };
     }

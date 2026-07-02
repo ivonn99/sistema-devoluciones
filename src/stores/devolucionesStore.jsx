@@ -460,7 +460,7 @@ const useDevolucionesStore = create((set, get) => ({
   createDevolucion: async (devolucionData) => {
     set({ loading: true, error: null });
     try {
-      const { productos, ...devolucionInfo } = devolucionData;
+      const { productos, cliente_id: _clienteId, ...devolucionInfo } = devolucionData;
 
       const plazoMaximo = {
         'local': 7,

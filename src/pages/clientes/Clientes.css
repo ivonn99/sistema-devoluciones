@@ -1,5 +1,25 @@
 /* Clientes.css - Optimizado con Bootstrap */
 
+.clientes-tabla-container {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.clientes-tabla-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.clientes-tabla-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.clientes-tabla-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
 /* Estilos mínimos personalizados */
 .modal.show {
   display: block !important;
@@ -14,4 +34,12 @@
   background-color: #1e293b !important;
   border-bottom-color: #334155 !important;
   color: #f1f5f9;
+}
+
+[data-theme="dark"] .clientes-tabla-container::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+[data-theme="dark"] .clientes-tabla-container::-webkit-scrollbar-thumb {
+  background: #475569;
 }

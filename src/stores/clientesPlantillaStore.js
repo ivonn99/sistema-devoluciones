@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
+import { normalizarCliente } from '../utils/textUtils';
 
 const useClientesPlantillaStore = create((set, get) => ({
   clientes: [],
@@ -31,10 +32,11 @@ const useClientesPlantillaStore = create((set, get) => ({
   upsertClientesMasivo: async (clientesArray) => {
     set({ loading: true, error: null, uploadProgress: 0 });
     try {
-      // Llamar a la función RPC de Supabase
+      const clientesNormalizados = clientesArray.map(normalizarCliente);
+
       const { data, error } = await supabase
         .rpc('upsert_clientes_masivo', {
-          clientes_data: clientesArray
+          clientes_data: clientesNormalizados
         });
 
       if (error) throw error;

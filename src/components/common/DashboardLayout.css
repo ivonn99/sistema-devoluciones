@@ -2,6 +2,11 @@
 .dashboard-layout {
   min-height: 100vh;
   background: #f8fafc;
+  position: relative;
+}
+
+.sidebar-backdrop {
+  display: none;
 }
 
 /* ========== CONTENIDO PRINCIPAL ========== */
@@ -19,6 +24,37 @@
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .sidebar-mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 100;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: #1e293b;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .sidebar-mobile-toggle:hover {
+    background: #334155;
+  }
+
   .main-content {
     margin-left: 0;
   }
@@ -27,6 +63,10 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
+}
+
+.sidebar-mobile-toggle {
+  display: none;
 }
 
 /* ========== SCROLLBAR PERSONALIZADO ========== */
