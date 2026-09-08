@@ -12,7 +12,7 @@ Si envías correos desde el frontend:
 **Ejemplo de lo que verían:**
 ```javascript
 // Esto estaría visible para TODOS
-const smtpPassword = "nxgrwloaygxtoobo"; // ⚠️ EXPUESTO
+const smtpPassword = "tu-contraseña-de-aplicacion"; // ⚠️ EXPUESTO
 ```
 
 ### 2. **Restricciones del Navegador**

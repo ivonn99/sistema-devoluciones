@@ -56,7 +56,7 @@ Si el problema persiste, puedes usar **Gmail SMTP** en lugar de Gmail API:
    - **Host:** `smtp.gmail.com`
    - **Port:** `587`
    - **Username:** `pedidosdmhn@gmail.com`
-   - **Password:** `nxgrwloaygxtoobo` (tu contraseña de aplicación)
+   - **Password:** tu contraseña de aplicación de 16 caracteres
    - **Secure:** `TLS` o `STARTTLS`
 
 4. Guardar

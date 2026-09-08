@@ -39,7 +39,7 @@ Asegúrate de tener estas variables en Supabase Secrets:
 SMTP_FROM=pedidosdmhn@gmail.com          ← Tu email de Gmail
 SMTP_FROM_NAME=Sistema de Devoluciones   ← Nombre que aparecerá
 SMTP_USER=pedidosdmhn@gmail.com          ← Para autenticación
-SMTP_PASSWORD=nxgrwloaygxtoobo            ← Contraseña de aplicación
+SMTP_PASSWORD=tu-contraseña-de-aplicacion ← Contraseña de aplicación
 ```
 
 ## 🎯 Resultado Final
