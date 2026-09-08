@@ -13,6 +13,7 @@ import {
   UsersRound,
   Trash2,
   FileSpreadsheet,
+  Mail,
   Moon,
   Sun
 } from 'lucide-react';
@@ -117,6 +118,11 @@ const menuConfig = {
       path: '/usuarios',
       label: 'Usuarios',
       icon: Users,
+    },
+    {
+      path: '/notificaciones/destinatarios',
+      label: 'Notificaciones',
+      icon: Mail,
     },
     {
       path: '/eliminar-notas',

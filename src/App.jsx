@@ -18,6 +18,8 @@ import Clientes from './pages/clientes/Clientes';
 import Usuarios from './pages/usuarios/Usuarios';
 import EliminarNotas from './pages/eliminar-notas/EliminarNotas';
 import ClientesPlantilla from './pages/clientes-plantilla/ClientesPlantilla';
+import Destinatarios from './pages/notificaciones/Destinatarios';
+import HistorialNotificaciones from './pages/notificaciones/HistorialNotificaciones';
 
 // Componente para rutas protegidas con verificación de rol
 const ProtectedRoute = ({ children, allowedRoles = null }) => {
@@ -152,6 +154,26 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
                 <EliminarNotas />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Destinatarios de notificaciones - Solo Admin */}
+          <Route
+            path="/notificaciones/destinatarios"
+            element={
+              <ProtectedRoute allowedRoles={['administrador']}>
+                <Destinatarios />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Historial de notificaciones - Solo Admin */}
+          <Route
+            path="/notificaciones/historial"
+            element={
+              <ProtectedRoute allowedRoles={['administrador']}>
+                <HistorialNotificaciones />
               </ProtectedRoute>
             }
           />

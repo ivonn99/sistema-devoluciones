@@ -1,0 +1,20 @@
+/* Destinatarios de notificaciones - complementos a Bootstrap */
+
+.table td .lucide {
+  flex-shrink: 0;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== MODO OSCURO ========== */
+[data-theme="dark"] .card .card-header.bg-light {
+  background-color: #1e293b !important;
+  border-bottom-color: #334155 !important;
+  color: #f1f5f9;
+}
